@@ -69,7 +69,7 @@ def _validate(questions: dict) -> tuple:
     errors = []
     if not isinstance(questions, dict) or not questions:
         return "/v1/systemone", ["questions: non-empty object required"]
-    endpoints = set()
+    has_task = False
     for name, q in questions.items():
         if not isinstance(q, dict):
             errors.append(f"{name}: must be an object with a type")
@@ -78,7 +78,7 @@ def _validate(questions: dict) -> tuple:
         if qtype not in ALL_TYPES:
             errors.append(f"{name}: unknown type {qtype!r}; use one of {sorted(ALL_TYPES)}")
             continue
-        endpoints.add("/v1/basal" if qtype in TASK_TYPES else "/v1/systemone")
+        has_task = has_task or qtype in TASK_TYPES
         if qtype in ("choice", "multi") and not isinstance(q.get("criteria"), (dict, list)):
             errors.append(f"{name}: {qtype} needs criteria (dict of key->description, or list)")
         if qtype == "score" and not isinstance(q.get("criteria"), list):
@@ -95,10 +95,8 @@ def _validate(questions: dict) -> tuple:
             errors.append(f"{name}: classify needs labels (list of name+rubric)")
         if "max_error" in q and q["max_error"] not in (0.01, 0.05, 0.1):
             errors.append(f"{name}: max_error should be 0.01, 0.05 or 0.1")
-    if len(endpoints) > 1:
-        errors.append("cannot mix question types from /v1/systemone and /v1/basal in one request")
-        endpoints = {"/v1/systemone"}
-    return (endpoints.pop() if endpoints else "/v1/systemone"), errors
+    # task types are accepted on both endpoints (docs/TASKS.md); /v1/basal is canonical
+    return ("/v1/basal" if has_task else "/v1/systemone"), errors
 
 
 def basal_decide(args: dict) -> str:

@@ -36,7 +36,7 @@ protocol (`omni-evaluation-protocol.md`) before choosing.
 | Several labels may apply | `multi` | `POST /v1/systemone` |
 | Action with different costs for errors; human escalation | `act` + `max_error` | `POST /v1/systemone` |
 | Selecting the next agent tool | `tool` + `max_error` | `POST /v1/systemone` |
-| Labels with rubrics / claim checking / passage selection / schema fields | `classify` / `verify` / `compress` / `extract` | `POST /v1/basal` (experimental) |
+| Labels with rubrics / claim checking / passage selection / schema fields | `classify` / `verify` / `compress` / `extract` | both endpoints; `/v1/basal` canonical (experimental) |
 
 Escalation: `act` or `tool` with `"max_error": 0.05` answers `"deferred":
 true` below the certified confidence threshold. Without a threshold certified
@@ -44,5 +44,5 @@ for the question type and error target, every automatic action is refused —
 which is the safe default, not an error.
 
 Exact request and response fields: `docs/API.md` in `rkinas/basal`; the task
-shapes: `docs/TASKS.md`. Both are copied into
-`omni-query-templates.md` (read 2026-10-24).
+shapes: `docs/TASKS.md`. Which types accept which input modality (documented
+vs untested): the compatibility matrix in `omni-query-templates.md`.
