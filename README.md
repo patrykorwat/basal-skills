@@ -69,6 +69,21 @@ skills directory (or your prompt). Nothing here assumes a specific agent.
    public skills contain knowledge, not environment.
 4. Community-facing content is published only after explicit owner approval.
 
+## Tests and CI
+
+`pytest` runs everything with stdlib + pytest only (Python 3.10+):
+
+- `tests/test_tools.py` — validator rules, endpoint routing, media encoding,
+  offline hints, against a throwaway HTTP stand-in for basal-serve;
+- `tests/test_mcp_bridge.py` — MCP handshake, tools/list, tools/call,
+  malformed-frame resilience of the DeepSeek Harness bridge;
+- `tests/test_skills.py` — frontmatter fields, cross-links between skills,
+  referenced files exist, JSON blocks parse, README table and install
+  commands, no machine paths or secrets in shipped files.
+
+GitHub Actions (`.github/workflows/ci.yml`) runs the suite on every push and
+PR, on Python 3.10 and 3.12.
+
 ## License
 
 MIT.

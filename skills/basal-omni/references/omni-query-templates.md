@@ -193,10 +193,13 @@ wrong automatic action costs clearly more than a human review.
 ```jsonc
 {"type": "act", "instructions": "...",
  "criteria": {"true": "...", "false": "..."},
- "costs": {"auto": {"wrong": <cost of a wrong automatic action>, "right": 0},
-           "human": {"true": <cost of review>, "false": <cost of review>}},
+ "costs": {"auto": {"wrong": "<COST_WRONG>", "right": 0},
+           "human": {"true": "<COST_REVIEW>", "false": "<COST_REVIEW>"}},
  "max_error": 0.05}
 ```
+
+The `<...>` entries stand for numbers (the cost of a wrong automatic action
+and of one human review); replace them before sending.
 
 `max_error` is the tolerated error rate. The answer carries `"deferred":
 true` (and `refused` names the automatic action) whenever the confidence
