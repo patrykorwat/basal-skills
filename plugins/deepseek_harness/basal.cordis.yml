@@ -1,0 +1,24 @@
+# basal-skills MCP server for DeepSeek Harness — stdio, local checkout.
+# Apply one-shot:  dsh --patch /ABS/PATH/TO/this/file web
+# Persist: merge the - insert: entry into $DSH_HOME/profiles/web/cordis.patch.yml
+# (do NOT overwrite an existing patch file — it may hold unrelated patches).
+#
+# Point command at the ABSOLUTE path of basal_mcp.py in your checkout.
+# DSH scrubs the spawned child's environment (names matching
+# KEY|PASSWORD|SECRET|TOKEN and all DSH_*), so BASAL_URL is re-passed here.
+- insert:
+    - id: mcp-basal-skills
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: basal_skills
+        transport: stdio
+        command: python3
+        args:
+          - '/ABSOLUTE/PATH/TO/basal-skills/plugins/deepseek_harness/basal_mcp.py'
+        env:
+          # Default basal-serve URL used when a call omits url; unset means
+          # http://127.0.0.1:8000.
+          BASAL_URL: !!js process.env.BASAL_URL || undefined
+        # Media requests encode up to 20 MB files and wait on GPU inference;
+        # 5 min per call covers a long eager-mode decision with headroom.
+        toolCallTimeoutMs: 300000

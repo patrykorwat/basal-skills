@@ -42,7 +42,8 @@ def _post(url: str, path: str, payload: dict, timeout: int = 300) -> dict:
 def _get(url: str, path: str, timeout: int = 15):
     req = urllib.request.Request(url.rstrip("/") + path, method="GET")
     with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+        body = resp.read().decode("utf-8")
+        return json.loads(body) if body.strip() else {}
 
 
 def _encode_media(media, errors: list) -> list:
