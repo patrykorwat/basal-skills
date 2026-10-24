@@ -19,15 +19,15 @@ layer), and keep community-facing content disciplined.
 
 ## Decision-systems landscape (read before writing on the topic)
 
-`references/decision-systems-map.md` — a map of the
-decision-systems literature (10 families: social choice, jury theorems,
-deliberation × AI, liquid democracy, QV/futarchy, sortition, participatory
-budgeting, LLM-as-decision-participant, AI governance, benchmark gaming).
-Each family: core question, anchor arXiv IDs (verified via live API), and
-what it implies for the thread. The synthesis (§10) holds the testable
-hypotheses that double as day-one discussion starters.
+`references/decision-systems-map.md` — **distilled findings from 34 papers**
+(one concrete finding per paper — no need to open arXiv; every ID verifiable
+at `https://arxiv.org/abs/<id>`), organized as 10 families: social choice,
+jury theorems, deliberation × AI, liquid democracy, QV/futarchy, sortition,
+participatory budgeting, LLM-as-decision-participant, AI governance, benchmark
+gaming. The synthesis (§10) holds the testable hypotheses that double as
+day-one discussion starters; §0a gives the whole map in 60 seconds.
 
-## Content discipline (from Radoskop practice, kept everywhere)
+## Content discipline
 
 1. **Never publish community-facing content without explicit owner approval**
    of the exact text — drafts live untracked (gitignored) until approved.
