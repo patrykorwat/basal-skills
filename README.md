@@ -22,6 +22,28 @@ Install: copy `plugins/basal-register/plugin.js` to
 `<hermes-home>/desktop-plugins/basal-register/plugin.js`, then run
 **Reload desktop plugins** from the command palette (⌘K).
 
+## Hermes plugin
+
+This repository is also a native Hermes plugin (`plugin.yaml` at the root).
+Installing it gives you, in one step:
+
+1. the `basal_decide` tool — a stdlib-only client for a local `basal-serve`
+   (`POST /v1/systemone` / `/v1/basal`): validates question shapes before
+   sending, base64-encodes media from local paths, routes tasks to the right
+   endpoint, and returns the calibrated answers;
+2. the `basal_health` tool — checks `/health` and the served model/mode;
+3. both skills bundled, namespaced: `skill_view("basal-skills:basal-omni")`.
+
+```bash
+hermes plugins install https://github.com/patrykorwat/basal-skills
+# or: desktop app → Settings → Plugins → Install from Git
+```
+
+Requires a running `basal-serve` for the tools to answer (see the
+basal-omni skill for start-up commands); `basal_health` tells you when it is
+up. Verified with `hermes plugins doctor`: manifest, import, registration of
+2 tools + 2 skills, no warnings.
+
 ## Install
 
 ### Via skills.sh

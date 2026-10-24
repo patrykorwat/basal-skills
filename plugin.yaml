@@ -1,0 +1,15 @@
+name: basal-skills
+version: 0.1.0
+description: >-
+  Basal decision models for Hermes: typed, calibrated decisions through a
+  local basal-serve (basal_decide, basal_health) plus the bundled skills
+  basal-strategies (community decision process) and basal-omni (media
+  routing, question templates, calibration).
+author: Radoskop
+license: MIT
+repository: https://github.com/patrykorwat/basal-skills
+python_dependencies: []
+capabilities: []
+provides_tools:
+  - basal_decide
+  - basal_health
