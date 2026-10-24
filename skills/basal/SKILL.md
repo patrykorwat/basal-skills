@@ -11,21 +11,25 @@ metadata:
 # basal
 
 Improve the **basal** community's decision-making process (Discord group) —
-grounded in decision-systems research (`references/decision-systems-map.md`)
-and the community's own experience: capture proposals and outcomes in a
-decision register, track the current thread (decision systems for
-parliaments; SejmBench, `github.com/radoskoppl/sejmbench`, is the measurement
-layer), and keep community-facing content disciplined.
+run proven decision methods (`references/decision-methods-playbook.md`),
+grounded in the research map (`references/decision-systems-map.md`) and the
+community's own experience: capture proposals and outcomes in a decision
+register, track the current thread (decision systems for parliaments;
+SejmBench, `github.com/radoskoppl/sejmbench`, is the measurement layer), and
+keep community-facing content disciplined.
 
-## Decision-systems landscape (read before writing on the topic)
+## Decision-systems toolkit (read before deciding or writing on the topic)
 
-`references/decision-systems-map.md` — **distilled findings from 34 papers**
-(one concrete finding per paper — no need to open arXiv; every ID verifiable
-at `https://arxiv.org/abs/<id>`), organized as 10 families: social choice,
-jury theorems, deliberation × AI, liquid democracy, QV/futarchy, sortition,
-participatory budgeting, LLM-as-decision-participant, AI governance, benchmark
-gaming. The synthesis (§10) holds the testable hypotheses that double as
-day-one discussion starters; §0a gives the whole map in 60 seconds.
+`references/decision-methods-playbook.md` — **the practical layer**: for each
+decision situation (yes/no vote, prioritization, budget, missing expertise,
+predictions, polarizing decisions, AI in the loop, process change) — the
+method as numbered steps, the receipts (arXiv IDs), and the traps.
+
+`references/decision-systems-map.md` — **the evidence base**: distilled
+findings from 34 papers (one concrete finding per paper; every ID verifiable
+at `https://arxiv.org/abs/<id>`), 10 families. The synthesis (§10) holds the
+testable hypotheses that double as day-one discussion starters; §0a gives
+the whole map in 60 seconds. Read the playbook to act, the map for receipts.
 
 ## Content discipline
 
