@@ -16,7 +16,9 @@ grounded in the research map (`references/decision-systems-map.md`) and the
 community's own experience: capture proposals and outcomes in a decision
 register, track the current thread (decision systems for parliaments;
 SejmBench, `github.com/radoskoppl/sejmbench`, is the measurement layer), and
-keep community-facing content disciplined.
+keep community-facing content disciplined. When a decision needs an image,
+scan or recording as input, use the companion skill `basal-omni` (model
+routing, question templates, calibration and evaluation).
 
 ## Decision-systems toolkit (read before deciding or writing on the topic)
 
