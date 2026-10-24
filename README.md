@@ -5,7 +5,7 @@ grounded in decision-systems research and the community's own experience.
 
 | Skill | Purpose |
 |---|---|
-| [basal](skills/basal/SKILL.md) | Decision-process improvement for basal (Discord): decision-systems literature map, decision register, thread tracking, content discipline |
+| [basal-strategies](skills/basal-strategies/SKILL.md) | Decision-process improvement for basal (Discord): decision methods playbook, literature map, decision register, thread tracking, content discipline |
 | [basal-omni](skills/basal-omni/SKILL.md) | Using basal models on media (images, scans, recordings): model routing, question templates, confidence thresholds, evaluation on your own data |
 
 The SejmBench benchmark (the measurement layer for parliamentary decisions)
@@ -27,7 +27,7 @@ Install: copy `plugins/basal-register/plugin.js` to
 ### Via skills.sh
 
 ```bash
-npx skills add patrykorwat/basal-skills --skill basal
+npx skills add patrykorwat/basal-skills --skill basal-strategies
 npx skills add patrykorwat/basal-skills --skill basal-omni   # media decisions
 ```
 

@@ -16,8 +16,8 @@ caller defines, with calibrated probabilities. It does not write free text.
 The models are experimental; the engine is at 2.4.1 (2026-10-23), and ultra
 and 1.1-max joined the omni family on 2026-10-17.
 
-Companion skill: `basal` covers the community decision process (Discord,
-methods, register). This skill covers model use. Shared principles — sources,
+Companion skill: `basal-strategies` covers the community decision process
+(Discord, methods, register). This skill covers model use. Shared principles — sources,
 frozen definitions, no machine paths, owner approval before publishing — are
 in the repository README.
 

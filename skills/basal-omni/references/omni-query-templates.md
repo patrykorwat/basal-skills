@@ -86,7 +86,8 @@ Input: text of a proposal, or a screenshot of a Discord thread (then
 Question: what type of decision does this proposal ask for. Answers:
 `yes_no_vote`, `prioritization`, `budget`, `missing_expertise`,
 `prediction`, `process_change`, `other` — use the playbook categories from
-the `basal` skill references so the labels match the decision register. Add
+the `basal-strategies` skill references so the labels match the decision
+register. Add
 `unclear` whenever the screenshot may be unreadable.
 
 ### Check a claim against a source (verify, experimental)

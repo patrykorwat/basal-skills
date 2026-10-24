@@ -1,6 +1,6 @@
 ---
-name: basal
-description: "Use when engaging the basal Polish AI community (Discord)."
+name: basal-strategies
+description: "Use when engaging the basal Polish AI community (Discord): running decision methods (yes/no votes, prioritization, budget, sortition, AI-in-the-loop), building or reviewing a decision register, tracking the SejmBench thread, and keeping community-facing content disciplined."
 version: 1.0.0
 author: Radoskop
 license: MIT
@@ -8,7 +8,7 @@ metadata:
   tags: [community, discord, outreach, poland]
 ---
 
-# basal
+# basal-strategies
 
 Improve the **basal** community's decision-making process (Discord group) —
 run proven decision methods (`references/decision-methods-playbook.md`),
