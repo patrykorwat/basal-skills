@@ -2,25 +2,42 @@
 
 The actionable layer of `decision-systems-map.md`. For each decision
 situation the community actually faces: **the method, how to run it, the
-receipts, the traps.** Papers are cited only as receipts — you do not need to
-open arXiv to run any of this.
+conditions under which it holds, the receipts, the traps.** Papers are cited
+as receipts, but the map's findings come from abstracts and vary in evidence
+type — when a step depends on one paper's conditions, that is stated. If you
+act without opening arXiv, you accept that transfer risk knowingly.
 
-How to use: identify your decision situation below, run the steps as written,
-record the outcome in the decision register with a review date. Come back to
-the map only when you want the receipts.
+How to use: identify your decision situation below, check its conditions
+against what you actually have (participants, data, infrastructure), run the
+steps as written, record the outcome in the decision register with a review
+date. Come back to the map only when you want the receipts.
 
-## 1. Yes/no group decision (the default case)
+## 1. Yes/no group decision (default only for checkable questions)
 
 Method: **independent vote + hybrid confirmation** (2603.29866, 2108.00733,
 2408.00317).
 
+Conditions (from the underlying studies — do not run this outside them):
+the question must have a checkable answer (rule compliance, category, claim
+vs source); the AI's accuracy should be comparable to the human majority on
+a labeled sample first; human and AI errors must not be strongly correlated
+(agreeing majorities can share priors — see the map's independence rule);
+the studied setting compares against a majority of at least three
+independent human judgments. On value questions there is no correct answer
+to confirm: the AI's verdict is advisory only (hard rule 4 of SKILL.md).
+
 1. State the decision and the options BEFORE any discussion. Members vote
    independently — anonymous, no seeing others' votes first.
 2. Get one AI judgment: a model reads the same options and votes
-   independently. Do not show it the human votes first.
+   independently. Do not show it the human votes first — enforce this in
+   the request `state`, not just in intent (`basal-omni` states it as a
+   request rule).
 3. If the human majority and the AI agree → accept, skip the debate.
+   "Agree" means: the AI's verdict equals the human majority verdict on the
+   same stated options.
 4. If they disagree → one discussion round, then a named tie-breaker (a
-   person who did not vote in round 1) decides.
+   person who did not vote in round 1) decides. The AI's verdict never
+   breaks the tie itself.
 5. Register the outcome with a review date (+30d default).
 
 Why it works: majority competence is conditional on independence — the
@@ -45,10 +62,18 @@ Method: **quadratic voting, computed by code** (1409.0264, 2308.04345,
 
 Rules: the arithmetic is done by a script, never by a model (zero-shot LLMs
 miscompute aggregation as groups grow, 2505.05016). QV's inefficiency decays
-like 1/n — it gets better with scale, so for small groups plain approval
-voting is fine. The adoption killer is UI friction: keep the poll dead
-simple (2308.04345). Concrete for basal: a pinned poll + a tiny script is a
-5-minute setup.
+like 1/n — it gets better with scale (that decay is from the literature);
+for small groups plain approval voting is fine — that fallback is our
+inference, not a paper's finding. The adoption killer is UI friction: keep
+the poll dead simple (2308.04345). Concrete for basal: a pinned poll + a
+tiny script is a 5-minute setup.
+
+Identity conditions: 100 credits per account presumes one natural person
+per account — with multi-accounting possible, QV becomes a popularity
+attack surface; require a roster or verified handles before running it.
+Anonymous voting as in method 1 is also limited on Discord: reactions are
+public until the vote is cast, so use a poll with hidden results, not
+reactions.
 
 ## 3. Allocating a budget (community fund, prizes)
 
@@ -64,6 +89,10 @@ Concrete: Pabulib (pabulib.org) ships real instances in .pb format and
 Polish city data — copy a working setup instead of inventing one
 (2012.06539).
 
+Conditions: needs an actual fund and a list of costed projects; without
+money on the table this method is dormant, use plain approval (§2) for
+non-monetary allocation.
+
 ## 4. Decisions needing expertise the group lacks
 
 Method: **per-topic, revocable delegation** (2206.13904, 2506.09789,
@@ -73,7 +102,8 @@ Method: **per-topic, revocable delegation** (2206.13904, 2506.09789,
 2. For a defined domain (e.g. "model licensing"), a member may delegate
    their vote to a named person FOR THAT TOPIC, revocable at any time.
 3. Constraints: one delegate per domain, no open transitive chains (cap at
-   one hop), public delegate list.
+   one hop), public delegate list. The one-hop cap is our design choice
+   from the cited critique, not a finding of 2206.13904 itself.
 
 Evidence: the strongest formal critique of liquid democracy has "little or
 no relevance" when sensible constraints are in place (2206.13904); LD runs
@@ -82,8 +112,11 @@ at production scale in DPoS chains (2309.01090); delegation churn is normal
 
 ## 5. Factual questions with verifiable outcomes ("will X happen?")
 
-Method: **prediction poll with a proper scoring rule** (2103.10011,
-2303.10857, 2503.03312).
+Method: **prediction poll with a proper scoring rule**. The scoring-rule
+choice rests on standard proper-scoring theory (Brier, log score), not on
+the papers below; the three receipts (2103.10011, 2303.10857, 2503.03312)
+are about decision markets and their manipulation, which we borrow as
+cautionary context, not as justification of the poll format.
 
 1. Write a resolvable question: deadline + named source of truth.
 2. Members submit probabilities (0–100%), optionally with small stakes or
@@ -91,7 +124,10 @@ Method: **prediction poll with a proper scoring rule** (2103.10011,
 3. At resolution, score with a proper scoring rule (log score) and publish
    the scoreboard.
 4. Act only on aggregates with enough participants — thin markets are
-   manipulable and shock effects persist ~60 days (2503.03312).
+   manipulable and shock effects persist ~60 days (2503.03312). The
+   literature gives no number for "enough"; our placeholder is 10+
+   submissions per question (author inference — calibrate to your own
+   noise before trusting an aggregate).
 
 Trap: classic decision markets require stochastic decision rules
 (sometimes a suboptimal action must be taken). If you need deterministic
@@ -102,6 +138,13 @@ execution, use proxy-forecasting variants with incentive compatibility
 
 Method: **random panel with pre-planned alternates** (2006.10498,
 2604.02712, 2506.15716).
+
+Conditions: sortition needs a candidate pool large enough to sample from
+(roughly 100+ eligible members for a 15–25 person panel with quotas and
+refusal buffer; below that the "random" panel is just the whole group — our
+threshold, not the papers'). It also needs demographic attributes for the
+quotas. In a small Discord, run it only when the pool is genuinely larger
+than the panel.
 
 1. Define the decision scope; invite the whole eligible pool.
 2. Sample the panel maximizing randomness under explicit constraints
@@ -128,7 +171,9 @@ Evidence: 2312.14877, 2505.05016, 2604.07667, 2508.08242, 2606.31762,
    AI-mediated messaging raised participation but lowered psychological
    safety — pick the trade-off knowingly (2606.31762).
 7. Model "personality" is measurable (persuasion vs compliance) and predicts
-   group outcomes — profile before assigning roles (2608.08199).
+   group outcomes — profile before assigning roles (2608.08199). Weak
+   evidence: it comes from one game-like setting; treat profiling as a
+   sanity check, not a hiring rule.
 
 ## 8. Deciding on the process itself
 
@@ -138,8 +183,10 @@ Method: **register + review + supersede** (2605.23628).
 2. Reviews are honest: worked / partial / failed — failures stay in the
    register; they are the experience base.
 3. When a decision affects measurement (benchmarks, leaderboards), freeze
-   fixtures and version definitions — benchmark gaming is election
-   manipulation, provably (2605.23628).
+   fixtures and version definitions. 2605.23628 models benchmark gaming as
+   voter bribery and proves its optimization hard in the worst case — that
+   is a complexity result, not a proof that gaming equals manipulation or
+   that hardness protects you in practice. Freeze anyway.
 4. Revisit the process quarterly: what we decided, what worked, what we
    would decide differently.
 

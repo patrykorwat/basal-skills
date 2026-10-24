@@ -1,7 +1,7 @@
 ---
 name: basal-omni
 description: Use when a task needs a typed decision from an image, scan, screenshot or audio recording (up to 30 seconds), or when choosing between basal-2.0 and basal-omni models, writing basal questions with allowed answers, fitting confidence thresholds, or evaluating basal on the user's own data. Trigger on basal-omni, basal-serve, POST /v1/systemone, decision from a document photo, classification of a recording, extraction of fields from a scan, verification of claims against a source. Use it even if the user does not name the model but asks for a local, calibrated, multiple-choice decision from media.
-version: 0.1.0
+version: 0.2.0
 author: Radoskop
 license: MIT
 metadata:
@@ -37,8 +37,10 @@ in the repository README.
    media travel in the `media` field of the HTTP request (base64). Record
    model name, engine version, mode and calibration file with every result.
 5. Route results below the threshold to a human (`act` or `tool` questions
-   with `max_error`, which answer `"deferred": true`). Report counts of
-   automatic and escalated cases separately.
+   with `max_error`, which answer `"deferred": true`). The error target must
+   come from calibration on your labeled data and your cost of a wrong
+   action — the 0.05 seen in examples is a placeholder, not a default.
+   Report counts of automatic and escalated cases separately.
 6. Publish nothing community-facing without explicit owner approval of the
    exact text.
 
@@ -69,14 +71,30 @@ A probability from basal is a calibrated score, not a guarantee. Treat it as
 a ranking signal for escalation. A threshold is valid only for the model
 version, question design and data type it was fitted on.
 
+**Checkable vs value questions.** Calibration means something only where a
+correct answer exists and can be checked later (rule compliance, category,
+claim-vs-source): there, a certified threshold may gate automation. On value
+questions nothing labels the truth, so no `max_error` has empirical basis and
+"confidence" measures the model's assertiveness, not accuracy: report the
+number as an opinion, start no action from it, and never present it as a
+chance of being right. `basal-strategies` owns this distinction; this skill
+enforces it at request level.
+
 ## Versions
 
 Models and engine change quickly. Do not copy benchmark numbers into this
 skill or into posts without a link and a read date. Link to the benchmark
 page (`basal.si5.pl/benchmark/`) and the Hugging Face model card, and state
-the date they were read. Record with every result: model name and weights
+the date they were read. Record in every result log: model name and weights
 revision, engine version, mode, calibration file, codebook version. Results
 from different versions are not comparable without stating the difference.
+
+**Diagnosing 422 before assuming a broken server:** templates were copied
+from engine 2.4.1 docs (read 2026-10-24); a `422 ... 0 options` or field
+error usually means the running server is older than that (check
+`release_date` in `/v1/models` — task expansion arrived in 2.4). Compare
+versions first, field names second, server health last. What actually passed
+on our builds: `references/tested-results.md`.
 
 ## Privacy
 

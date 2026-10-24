@@ -6,6 +6,11 @@ the omni calibration is fitted on text — media answers carry
 
 ## Steps
 
+0. If you have no labeled, checkable dataset yet, measure first: collect
+   30–50 decisions with known answers (rule compliance, categories, claims
+   vs sources) and compare the model's verdicts to humans before anything
+   enters the process. On value questions there is no dataset to fit, so
+   skip automation entirely (see the checkable/value rule).
 1. Collect labeled examples from the real process. Practical floor: the
    engine's `basal-calibrate` needs at least 50 labeled decisions per
    question type for a full fit (`--min-per-type 50`; below that, down to 10,

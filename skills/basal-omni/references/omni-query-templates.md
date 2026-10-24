@@ -22,6 +22,10 @@ the schema type. Define all four before running a model.
    version silently.
 5. Write questions in the language of the media. Polish and English are
    supported; pass `"lang"` when the state text does not show the language.
+6. When a model judges independently of human votes (hybrid confirmation in
+   `basal-strategies`), the independence lives in the `state`: it must not
+   contain human votes, tallies, or discussion that reveals them. Build the
+   state from the decision and options only.
 
 ## Endpoints
 
@@ -120,9 +124,9 @@ Everything else is untested: assume nothing until your own check.
 | model `mini`, `max` | yes | yes | yes | documented (`--media on`) |
 
 Text decisions (`choice`, `noul`, `act`, `facts: auto`) were Tested on
-basal-omni-1.0-ultra-FP8 in vllm mode on 2026-10-24. Task types were not:
-that build did not expand them (engine 2.3.0, `release_date` 2026-10-05);
-retest after upgrading to 2.4.1.
+basal-omni-1.0-ultra-FP8 in vllm mode on 2026-10-24; task types were not
+(that build did not expand them, engine 2.3.0). The dated log lives in
+`tested-results.md`.
 
 ## Templates for the community decision process
 
@@ -131,12 +135,14 @@ retest after upgrading to 2.4.1.
 Input: text of a proposal, or a screenshot of a Discord thread (then
 `"state": ""` plus the image in `media`, with `detail: "high"`).
 
-Question: what type of decision does this proposal ask for. Labels mirror
-the eight situations of the `basal-strategies` playbook, so the classifier
-and the decision register share one vocabulary: `yes_no_vote`,
-`prioritization`, `budget`, `missing_expertise`, `prediction`,
-`polarizing_decision`, `ai_in_loop`, `process_change`, plus `other` and
-`unclear` as separate options.
+Question: what type of decision does this proposal ask for. The label list
+comes from the codebook version recorded in the decision register (owned by
+the `basal-strategies` skill, which mirrors its eight decision situations:
+`yes_no_vote`, `prioritization`, `budget`, `missing_expertise`,
+`prediction`, `polarizing_decision`, `ai_in_loop`, `process_change`); pass
+the labels explicitly in the request `criteria`, plus `other` and `unclear`
+as separate options. This template works with any label list — install it
+without the other skill and it still runs.
 
 ### Check a claim against a source (verify, experimental)
 
