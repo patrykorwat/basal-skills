@@ -18,6 +18,13 @@ Install: copy `plugins/basal-register/plugin.js` to
 `<hermes-home>/desktop-plugins/basal-register/plugin.js`, then run
 **Reload desktop plugins** from the command palette (⌘K).
 
+## Versioning
+
+The project is versioned (`VERSION`, SemVer) and released as git tags; the
+plugin manifest mirrors it, each skill carries its own version, and
+`CHANGELOG.md` records every change. The workflow and the enforced rules are
+in [`AGENTS.md`](AGENTS.md) — start there if you are changing this repo.
+
 ## Hermes plugin
 
 This repository is also a native Hermes plugin (`plugin.yaml` at the root).
