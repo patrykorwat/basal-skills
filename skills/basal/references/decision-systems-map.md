@@ -1,128 +1,181 @@
-# Systemy decyzyjne — mapa literatury (arXiv, 2026-10-24)
+# Decision systems — literature map (arXiv, 2026-10-24)
 
-Materiał otwierający wątek o systemach decyzyjnych dla parlamentu
-(społeczność basal). Każdy blok to jedna **rodzina** systemów decyzyjnych:
-rdzeń problemu + prace kotwiczne (ID weryfikowalne pod
-`https://arxiv.org/abs/<id>`) + dlaczego to ma znaczenie dla wątku. Wszystkie
-pozycje pochodzą z żywych zapytań do API arXiva w dniu 2026-10-24 — nic z
-pamięci. Notatka to „raj": przestrzeń projektowa, z której wątek może czerpać;
-pomiar status quo (roll-call Sejmu) żyje w repo sejmbench.
+Background material for a community thread on decision systems for
+parliaments (the "basal" community). Each block is one **family** of decision
+systems: the core problem, anchor papers (IDs verifiable at
+`https://arxiv.org/abs/<id>`), and why it matters for the thread. Every entry
+comes from live arXiv API queries on 2026-10-24 — nothing from memory. This
+note is the design space the thread can draw from; the measurement of the
+status quo (Sejm roll-calls) lives in the sejmbench repo.
 
-## 0. Teza wątku w jednym akapicie
+## 0. The thread's thesis in one paragraph
 
-Każdy system decyzyjny odpowiada na cztery pytania: **kto decyduje** (kwalifikacja/losowanie/reprezentacja), **jak agregujemy** (reguła głosowania/delegacja/rynek), **co wiemy zanim zdecydujemy** (epistemia: jury theorem, mądrość tłumu, rynki predykcyjne) i **jak sprawdzamy po fakcie** (backtest, nadzór). Literatura ma dojrzałe komponenty dla każdego z tych pytań — brakuje pomiaru, który mówi, który komponent *działa*. Stąd naturalny pomost do SejmBench: benchmark jest warstwą weryfikacji dla status quo, a mapa poniżej pokazuje, co można by na nim testować jutro.
+Every decision system answers four questions: **who decides**
+(qualification/lottery/representation), **how we aggregate** (voting rule /
+delegation / market), **what we know before deciding** (epistemics: jury
+theorems, wisdom of crowds, prediction markets), and **how we verify after
+the fact** (backtests, oversight). The literature has mature components for
+each question — what is missing is measurement that says which component
+*works*. Hence the natural bridge to SejmBench: the benchmark is the
+verification layer for the status quo, and the map below shows what could be
+tested on it tomorrow.
 
-## 1. Agregacja preferencji — computational social choice
+## 1. Preference aggregation — computational social choice
 
-Rdzeń: matematyka reguł głosowania. Nie ma „naturalnego" zwycięzcy — jest reguła, a każda reguła ma pułapki (twierdzenia o niemożliwości, manipulacja, kupowanie głosów).
+Core: the mathematics of voting rules. There is no "natural" winner — there
+is a rule, and every rule has known failure modes (impossibility theorems,
+manipulation, vote buying).
 
-- **2410.14078** — Computational Social Choice: Parameterized Complexity and Challenges. Przegląd problemów trudności obliczeniowej w socchoice.
-- **2602.20074** — Computational Social Choice: Research & Development. Stan pola badawczego.
-- **2608.25444** — Continuous Computational Social Choice: A Case Study in Bribery. Kupowanie głosów jako modelowany problem — odporność na manipulację to twarda własność systemu, nie detal.
+- **2410.14078** — Computational Social Choice: Parameterized Complexity and Challenges. A survey of computational-hardness problems in socchoice.
+- **2602.20074** — Computational Social Choice: Research & Development. The state of the field.
+- **2608.25444** — Continuous Computational Social Choice: A Case Study in Bribery. Vote buying as a modeled problem — manipulation resistance is a hard system property, not a detail.
 
-**Dla wątku:** zanim padnie propozycja „lepszego głosowania w Sejmie", pytanie brzmi: jaka reguła, odporna na co, i poznaliśmy jej pułapki. Socchoice daje słownik, żeby te rozmowy nie były tylko wibracjami.
+**For the thread:** before anyone proposes "a better parliament vote", the
+question is: which rule, resistant to what, and do we know its failure
+modes. Socchoice gives the vocabulary so these discussions are not just
+vibes.
 
-## 2. Epistemia — kiedy grupa wie więcej
+## 2. Epistemics — when the group knows more
 
-Rdzeń: warunki, w których agregacja niezależnych sądów przekracza jakość pojedynczego eksperta — i kiedy się psuje.
+Core: the conditions under which aggregating independent judgments beats a
+single expert — and when it breaks.
 
-- **2108.00733** — On the probability of the Condorcet Jury Theorem or the Miracle of Aggregation. Klasyczne twierdzenie: przy niezależnych sądach o p>1/2 większość jest niemal nieomylna — ale założenia są surowe.
-- **2408.00317 / 2510.18062** — Condorcet's Jury Theorem (with) Abstention. Wariant z absencją: niegłosujący zmieniają matematykę — bezpośredni język dla debaty o frekwencji i wstrzymujących się.
-- **2603.29866** — Beyond AI advice — independent aggregation boosts human-AI accuracy. Niezależna agregacja osądów (ludzkich i AI) bije wspólną dyskusję z dopasowaniem do jednej rady.
-- **2610.28539** — Humans Correct Their Judgments Through Debate, but Weaker AI Models Do Not. Debata naprawia ludzi; słabsze modele ulegają shearingowi grupy.
+- **2108.00733** — On the probability of the Condorcet Jury Theorem or the Miracle of Aggregation. The classic: with independent judgments of p>1/2 accuracy, majorities are near-infallible — but the assumptions are strict.
+- **2408.00317 / 2510.18062** — Condorcet's Jury Theorem (with) Abstention. The abstention variant: non-voters change the mathematics — direct language for debating turnout and abstentions.
+- **2603.29866** — Beyond AI advice — independent aggregation boosts human-AI accuracy. Independent aggregation of judgments (human and AI) beats joint discussion fitted to a single panel.
+- **2610.28539** — Humans Correct Their Judgments Through Debate, but Weaker AI Models Do Not. Debate fixes humans; weaker models yield to the group.
 
-**Dla wątku:** „więcej głów" nie wystarczy — liczy się **niezależność** sądów. To jest kryterium oceny każdego pomysłu: czy system chroni niezależność osądów, czy ją kasuje (efekt sali, kaskady, presja linii klubowej).
+**For the thread:** "more heads" is not enough — **independence** of
+judgments is what counts. That is the evaluation criterion for every idea:
+does the system protect independence of judgment, or dissolve it (room
+effect, cascades, party-line pressure)?
 
-## 3. Deliberacja i AI jako przedstawiciel
+## 3. Deliberation and AI as the representative
 
-Rdzeń: jakość decyzji rośnie z jakością rozmowy, ale uwaga ludzka jest ograniczona — AI wchodzi jako mediator albo pełnomocnik.
+Core: decision quality grows with conversation quality, but human attention
+is limited — AI enters as mediator or proxy.
 
-- **2603.16260** — Human/AI Collective Intelligence for Deliberative Democracy (CI4DD). Ramy: AI jako narzędzie augmentacji zbiorowej inteligencji w deliberacji, z podejściem human-centred.
-- **2605.24413** — Habermolt: Delegating Deliberation to AI Representatives. AI nie tylko mediuje — reprezentuje obywatela w deliberacji. Pytanie graniczne: komu agent jest wierny.
-- **2503.05830** — AI-Enhanced Deliberative Democracy and the Future of the Collective Will. Wizja polityczna z AI w pętli.
+- **2603.16260** — Human/AI Collective Intelligence for Deliberative Democracy (CI4DD). A framework: AI as an augmentation tool for collective intelligence in deliberation, human-centred by design.
+- **2605.24413** — Habermolt: Delegating Deliberation to AI Representatives. AI not only mediates — it represents a citizen in deliberation. The boundary question: to whom is the agent loyal.
+- **2503.05830** — AI-Enhanced Deliberative Democracy and the Future of the Collective Will. The political vision with AI in the loop.
 
-**Dla wątku:** system decyzyjny dla sejmu nie musi zaczynać od zmiany głosowania — może od zmiany **przygotowania** decyzji: AI-mediated deliberacja na poziomie agendy, zamiast walked-in projektów z gabinetu.
+**For the thread:** a decision system for a parliament does not have to start
+by changing the vote — it can start by changing **preparation**: AI-mediated
+deliberation at the agenda level, instead of walked-in drafts from the
+back office.
 
-## 4. Delegacja — płynna demokracja
+## 4. Delegation — liquid democracy
 
-Rdzeń: głos bezpośredni + oddawanie głosu komuś, komu ufam w tym temacie. Delegacja jako mechanizm pierwszej klasy, nie wyjątek.
+Core: direct voting plus handing your vote to someone you trust on the topic.
+Delegation as a first-class mechanism, not an exception.
 
-- **2206.13904** — A Contribution to the Defense of Liquid Democracy. Obrona wobec zarzutów o koncentrację władzy — plus uczciwe pokazanie, gdzie ryzyko jest realne.
-- **2506.09789** — Delegations as Adaptive Representation Patterns. Delegacje jako adaptacyjne wzorce reprezentacji — wpływ jest dynamiczny, nie stały.
-- **2309.01090** — Liquid Democracy in DPoS Blockchains. Wdrożenia w praktyce (blockchain DPoS) — co się dzieje z delegacją, gdy jest realnie używana.
+- **2206.13904** — A Contribution to the Defense of Liquid Democracy. A defense against power-concentration critiques — with an honest look at where the risk is real.
+- **2506.09789** — Delegations as Adaptive Representation Patterns. Delegations as adaptive patterns of representation — influence is dynamic, not fixed.
+- **2309.01090** — Liquid Democracy in DPoS Blockchains. Deployments in practice (DPoS blockchains) — what happens to delegation when it is actually used.
 
-**Dla wątku:** polski układ mandatu (wolny mandat + dyscyplina klubowa) to de facto zamrożona delegacja bez prawa odwołania. Liquid democracy daje słownictwo, by to nazwać i zaprojektować alternatywy (delegacja tematyczna, odwoływalność).
+**For the thread:** the Polish mandate setup (free mandate + party
+discipline) is de facto frozen delegation without a right of recall. Liquid
+democracy provides the vocabulary to name this and to design alternatives
+(topic-specific delegation, recallability).
 
-## 5. Rynki decyzyjne i kwadratowe głosowanie
+## 5. Decision markets and quadratic voting
 
-Rdzeń: agregacja informacji przez stawki — ci, którzy wiedzą więcej, mają bodziec, by w to wchodzić; głosowanie tego bodźca nie ma.
+Core: aggregating information through stakes — those who know more have an
+incentive to participate; voting has no such incentive.
 
-- **1409.0264** — Nash Equilibria for Quadratic Voting. QV: koszt głosu rośnie kwadratowo z liczbą głosów — teoria równowagi.
-- **2308.04345** — Fair and Inclusive Participatory Budgeting: Voter Experience with Cumulative and Quadratic Voting. QV w praktyce budżetów — doświadczenie wyborcy ma znaczenie.
-- **2103.10011** — Securities Based Decision Markets. Futarchy: „głosujemy nad wartościami, rynek stawia nad środkami" — formalizacja.
-- **2303.10857** — Proxy Forecasting to Avoid Stochastic Decision Rules in Decision Markets. Problem futarchy: decyzja nie może być losową funkcją kursu — potrzebne proxy-prognozy.
-- **2503.03312** — How manipulable are prediction markets? Odporność rynków na manipulację — the eternal question.
+- **1409.0264** — Nash Equilibria for Quadratic Voting. QV: the cost of a vote grows quadratically with the number of votes — equilibrium theory.
+- **2308.04345** — Fair and Inclusive Participatory Budgeting: Voter Experience with Cumulative and Quadratic Voting. QV in budget practice — voter experience matters.
+- **2103.10011** — Securities Based Decision Markets. Futarchy: "we vote on values, the market bets on means" — the formalization.
+- **2303.10857** — Proxy Forecasting to Avoid Stochastic Decision Rules in Decision Markets. The futarchy problem: a decision cannot be a random function of a price — proxy forecasts are needed.
+- **2503.03312** — How manipulable are prediction markets? Market manipulation resistance — the eternal question.
 
-**Dla wątku:** rodzina mechanizmów z ceną jako sygnałem. W Polsce wystawione na trudne pytania (koncentracja kapitału = koncentracja „głosu"), ale jako źródło informacji dla decyzji — dojrzały temat.
+**For the thread:** the family of price-as-signal mechanisms. In Poland it
+faces hard questions (capital concentration = concentration of "votes"), but
+as an information source for decisions it is a mature topic.
 
-## 6. Losowanie — panel obywatelski jako organ
+## 6. Sortition — the citizens' panel as an organ
 
-Rdzeń: losowanie (sortycja) zamiast elekcji dla części funkcji — epistemiczna różnorodność zamiast rywalizacji.
+Core: lottery (sortition) instead of election for some functions —
+epistemic diversity instead of competition.
 
-- **2006.10498** — Neutralizing Self-Selection Bias in Sampling for Sortition. Kluczowy problem praktyczny: kogo losujemy, gdy nie każdy przychodzi — korekta biasu samo-selekcji.
-- **2604.02712** — Maximally Random Sortition. Ile losowości optymalnie.
-- **2506.15716** — Alternates, Assemble! Selecting Optimal Alternates for Citizens' Assemblies. Zastępcy — logistyka ciągłości panelu.
+- **2006.10498** — Neutralizing Self-Selection Bias in Sampling for Sortition. The key practical problem: whom do we sample when not everyone shows up — correcting self-selection bias.
+- **2604.02712** — Maximally Random Sortition. How much randomness is optimal.
+- **2506.15716** — Alternates, Assemble! Selecting Optimal Alternates for Citizens' Assemblies. Alternates — the logistics of panel continuity.
 
-**Dla wątku:** assemblies obywatelskie to jedyna rodzina, która przeszła z teorii do realnych wdrożeń w ostatnich latach (Irlandia, Francja) — warto znać ich ograniczenia (self-selection!) zanim ktoś je wpisze do konstytucji.
+**For the thread:** citizens' assemblies are the only family that moved from
+theory to real deployments in recent years (Ireland, France) — know their
+limits (self-selection!) before anyone writes them into a constitution.
 
-## 7. Budżet obywatelski — wielozwycięskie agregacje w praktyce
+## 7. Participatory budgeting — multi-winner aggregation in practice
 
-Rdzeń: nie „za/przeciw", tylko wybór portfela projektów — inni klasa reguł (multi-winner, proporcjonalność).
+Core: not "for/against" but choosing a portfolio of projects — a different
+class of rules (multi-winner, proportionality).
 
-- **2003.00606** — Participatory Budgeting: Models and Approaches. Modelowe podstawy PB.
-- **2012.06539** — Pabulib: A Participatory Budgeting Library. Biblioteka instancji PB (polski rodowód — warszawskie data) — realne dane do badań nad regułami.
-- **2603.09660** — Proportionality Degree in Participatory Budgeting. Miara proporcjonalności reguł PB — jak mierzyć uczciwość podziału.
+- **2003.00606** — Participatory Budgeting: Models and Approaches. The model foundations of PB.
+- **2012.06539** — Pabulib: A Participatory Budgeting Library. A library of PB instances (Polish origin — Warsaw data) — real data for research on rules.
+- **2603.09660** — Proportionality Degree in Participatory Budgeting. A proportionality measure for PB rules — how to measure fairness of allocation.
 
-**Dla wątku:** PB jest najbliższym obywatelowi systemem decyzyjnym (polskie miasta go mają) i naturalnym poligonem: tu reguły można zmieniać bez rewolucji i mierzyć skutki.
+**For the thread:** PB is the decision system closest to the citizen
+(Polish cities run it) and a natural testbed: rules can be changed there
+without a revolution, and effects can be measured.
 
-## 8. LLM jako uczestnik decyzji — co już wiemy
+## 8. LLMs as decision participants — what we already know
 
-Rdzeń: modele językowe wchodzą w systemy decyzyjne jako agenci, mediatorzy i agregatory — i mają zmierzone wady.
+Core: language models enter decision systems as agents, mediators, and
+aggregators — with measured weaknesses.
 
-- **2312.14877** — Robust Knowledge Extraction from LLMs using Social Choice Theory. Socchoice (rankingi zamiast pojedynczych odpowiedzi) stabilizuje odpowiedzi LLM — agregacja jako narzędzie niezawodności.
-- **2505.05016** — The Pitfalls of Growing Group Complexity: LLMs and Social Choice-Based Aggregation. LLM-y zero-shot **błędnie liczą** reguły agregacji przy rosnącej liczbie uczestników — dokładnie tam, gdzie system decyzyjny potrzebuje precyzji.
-- **2604.07667** — From Debate to Decision: Conformal Social Choice. Zgoda w debacie agentów ≠ poprawność; potrzebna kalibracja decyzji (act-vs-escalate).
-- **2508.08242** — Bringing Everyone to the Table: LLM-Facilitated Group Decision Making. Eksperyment: LLM jako facylitator decyzji grupy ludzi.
-- **2606.31762** — Investigating LLM-Powered Dissenting Minority Support in Power-Imbalanced Group Decision-Making. Czy AI wspiera mniejszość w grupach o nierównej władzie — albo pogłębia hegemonię.
-- **2608.08199** — Persuasive and Compliant Tendencies Predict Group Decision-Making in Humans and Language Models. Te same tendencje (uległość, perswazyjność) przewidują zachowanie ludzi i modeli — dowód, że modele importują ludzkie patologie decyzji.
+- **2312.14877** — Robust Knowledge Extraction from LLMs using Social Choice Theory. Socchoice (rankings instead of single answers) stabilizes LLM responses — aggregation as a reliability tool.
+- **2505.05016** — The Pitfalls of Growing Group Complexity: LLMs and Social Choice-Based Aggregation. Zero-shot LLMs **miscompute** aggregation rules as the group grows — exactly where a decision system needs precision.
+- **2604.07667** — From Debate to Decision: Conformal Social Choice. Agreement in agent debate ≠ correctness; decisions need calibration (act-vs-escalate).
+- **2508.08242** — Bringing Everyone to the Table: LLM-Facilitated Group Decision Making. An experiment: an LLM facilitating a human group's decision.
+- **2606.31762** — Investigating LLM-Powered Dissenting Minority Support in Power-Imbalanced Group Decision-Making. Does AI support minorities in power-imbalanced groups — or deepen dominance.
+- **2608.08199** — Persuasive and Compliant Tendencies Predict Group Decision-Making in Humans and Language Models. The same tendencies (compliance, persuadability) predict behavior of humans and models — evidence that models import human decision pathologies.
 
-**Dla wątku:** jeśli system decyzyjny dla sejmu ma mieć AI w pętli, to trzeba wiedzieć, **gdzie modele zawodzą**: agregacja liczbowa (poprawność), konformizm (niezależność), wsparcie mniejszości (fairness). To są testowalne hipotezy — i naturalne rozszerzenia benchmarku.
+**For the thread:** if a parliamentary decision system is to have AI in the
+loop, we need to know **where models fail**: numerical aggregation
+(accuracy), conformity (independence), minority support (fairness). These
+are testable hypotheses — and natural benchmark extensions.
 
-## 9. Governance samej AI — systemy decyzyjne dla agentów
+## 9. Governing AI itself — decision systems for agents
 
-- **2412.17114** — Decentralized Governance of Autonomous AI Agents (ETHOS). Ramy nadzoru nad autonomicznymi agentami; istniejące akty (EU AI Act, NIST) nie pokrywają agentowej autonomii.
-- **2510.21117** — DAO-AI: Evaluating Collective Decision-Making through Agentic AI in Decentralized Governance. Agenci w DAO — mierzenie jakości decyzji hybrydowych.
-- **2605.23628** — How Hard is it to Rig a Benchmark? A Social Choice Analysis of Leaderboard Robustness. Benchmark = wybory: datasety jako wyborcy, modele jako kandydaci; gaming leaderboardu = manipulacja wyborcza. Uzasadnienie frozen-fixture z pierwszej zasady.
+- **2412.17114** — Decentralized Governance of Autonomous AI Agents (ETHOS). Oversight frameworks for autonomous agents; existing acts (EU AI Act, NIST) do not cover agent autonomy.
+- **2510.21117** — DAO-AI: Evaluating Collective Decision-Making through Agentic AI in Decentralized Governance. Agents in DAOs — measuring hybrid decision quality.
+- **2605.23628** — How Hard is it to Rig a Benchmark? A Social Choice Analysis of Leaderboard Robustness. A benchmark is an election: datasets as voters, models as candidates; leaderboard gaming = electoral manipulation. The first-principles justification for frozen fixtures.
 
-**Dla wątku:** refleksja w lustrze — zanim naprawiamy systemy decyzyjne ludzi, sprawdźmy, czy nasze własne narzędzia pomiaru (benchmarki, rankingi) same są odporne na manipulację.
+**For the thread:** a mirror check — before fixing human decision systems,
+verify that our own measurement instruments (benchmarks, leaderboards) are
+themselves manipulation-resistant.
 
-## 10. Co z tego wynika dla wątku (synteza)
+## 10. What follows for the thread (synthesis)
 
-1. **Przestrzeń projektowa jest gotowa:** agregacja (socchoice), epistemia (jury/mądrość tłumu), deliberacja (AI-mediated), delegacja (liquid), sygnał cenowy (QV/futarchy), losowanie (sortycja), portfel (PB). Każda rodzina ma teorię i narzędzia.
-2. **Brakuje warstwy pomiaru:** literatura proponuje systemy, ale rzadko mierzy je na realnych, frozen danych decyzji. SejmBench daje taki pomiar dla status quo (roll-call) — wątek może więc pytać: *jaki eksperyment na benchmarku odróżniłoby te rodziny?*
-3. **Najtwardsze hipotezy na start** (testowalne na danych Sejmu):
-   - dyscyplina klubowa jako „zdegenerowana delegacja" — ile informacji głosu pochłania linia klubu (mierzalne: rebellion rate, spójność);
-   - absencja i wstrzymanie jako trzeci głos — czy jury theorem z absencją (2408.00317) opisuje Sejm;
-   - konformizm modeli vs konformizm radnych — czy LLM-agenci przejmują patologie, które widzimy w danych (2608.08199).
-4. **Red line:** żadna rodzina nie jest „odpowiedzią" — każdy mechanizm ma zbadane pułapki (manipulacja, samoselekcja, koncentracja). Rzetelny wątek pokazuje obie strony; to jest też styl Radoskopu: „ZA i nad czym", nie „przeciw".
+1. **The design space is ready:** aggregation (socchoice), epistemics
+   (jury/wisdom of crowds), deliberation (AI-mediated), delegation (liquid),
+   price signals (QV/futarchy), sortition, portfolios (PB). Every family has
+   theory and tools.
+2. **The measurement layer is missing:** the literature proposes systems but
+   rarely measures them on real, frozen decision data. SejmBench provides
+   that measurement for the status quo (roll-calls) — so the thread can ask:
+   *which experiment on the benchmark would separate these families?*
+3. **The hardest starter hypotheses** (testable on Sejm data):
+   - party discipline as degenerate delegation — how much information the
+     party line absorbs from a vote (measurable: rebellion rate, cohesion);
+   - absence as a third vote — does the jury theorem with abstention
+     (2408.00317) describe the Sejm;
+   - model conformity vs councilor conformity — do LLM agents import the
+     pathologies we see in the data (2608.08199).
+4. **Red line:** no family is "the answer" — every mechanism has studied
+   failure modes (manipulation, self-selection, concentration). A rigorous
+   thread shows both sides; this is also the Radoskop style: "for what and
+   how", never "against".
 
-## Metoda
+## Method
 
-Zapytania do `export.arxiv.org/api/query` (2026-10-24): computational social
-choice; liquid democracy; quadratic voting; futarchy / decision markets;
-prediction markets; deliberative democracy + AI; citizens' assembly; collective
-intelligence; judgment aggregation; sortition; decentralized governance +
-blockchain; LLM + social choice; Condorcet jury theorem; participatory
-budgeting; wisdom of the crowd + AI; approval/ranked choice; LLM + group
-decision; epistemic democracy. Abstrakty kluczowych pozycji czytane w całości
-z API. Każdy ID weryfikowalny: `https://arxiv.org/abs/<id>`.
+Queries against `export.arxiv.org/api/query` (2026-10-24): computational
+social choice; liquid democracy; quadratic voting; futarchy / decision
+markets; prediction markets; deliberative democracy + AI; citizens'
+assembly; collective intelligence; judgment aggregation; sortition;
+decentralized governance + blockchain; LLM + social choice; Condorcet jury
+theorem; participatory budgeting; wisdom of the crowd + AI; approval/ranked
+choice; LLM + group decision; epistemic democracy. Abstracts of key papers
+read in full from the API. Every ID verifiable at
+`https://arxiv.org/abs/<id>`.

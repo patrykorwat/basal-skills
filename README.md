@@ -1,4 +1,4 @@
-# radoskoppl/skills
+# patrykorwat/basal-skills
 
 Agent skills published by [Radoskop](https://github.com/radoskoppl) —
 following the [agent skills convention](https://skills.sh): one directory per
@@ -8,14 +8,14 @@ can read and follow.
 | Skill | Purpose |
 |---|---|
 | [sejmbench](skills/sejmbench/SKILL.md) | Work on the SejmBench benchmark: LLM evaluation on Polish parliamentary roll-call data (Sejm API recipes, metric principles, roadmap) |
-| [basal](skills/basal/SKILL.md) | Engage the "basal" Polish AI community (Discord): thread tracking, content discipline for benchmark outreach |
+| [basal](skills/basal/SKILL.md) | Engage the "basal" Polish AI community (Discord): thread tracking, content discipline, decision-systems literature map |
 
 ## Install
 
 ### Via skills.sh
 
 ```bash
-npx skills add radoskoppl/skills --skill sejmbench
+npx skills add patrykorwat/basal-skills --skill sejmbench
 ```
 
 Select your agent when prompted. Installation is project-local by default;

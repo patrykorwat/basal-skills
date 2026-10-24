@@ -16,7 +16,7 @@ content discipline, and outreach workflows (current thread: SejmBench,
 
 ## Decision-systems landscape (read before writing on the topic)
 
-`references/decision-systems-map.md` — a Polish-language map of the
+`references/decision-systems-map.md` — a map of the
 decision-systems literature (10 families: social choice, jury theorems,
 deliberation × AI, liquid democracy, QV/futarchy, sortition, participatory
 budgeting, LLM-as-decision-participant, AI governance, benchmark gaming).
