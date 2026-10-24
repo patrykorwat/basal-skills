@@ -1,21 +1,22 @@
 # patrykorwat/basal-skills
 
-Agent skills published by [Radoskop](https://github.com/radoskoppl) —
-following the [agent skills convention](https://skills.sh): one directory per
-skill, each with a `SKILL.md` that any agent (Claude Code, Hermes, Codex, …)
-can read and follow.
+Skills for improving the **basal** community's decision-making process —
+grounded in decision-systems research and the community's own experience.
 
 | Skill | Purpose |
 |---|---|
-| [sejmbench](skills/sejmbench/SKILL.md) | Work on the SejmBench benchmark: LLM evaluation on Polish parliamentary roll-call data (Sejm API recipes, metric principles, roadmap) |
-| [basal](skills/basal/SKILL.md) | Engage the "basal" Polish AI community (Discord): thread tracking, content discipline, decision-systems literature map |
+| [basal](skills/basal/SKILL.md) | Decision-process improvement for basal (Discord): decision-systems literature map, decision register, thread tracking, content discipline |
+
+The SejmBench benchmark (the measurement layer for parliamentary decisions)
+lives in its own repo, with its own SKILL.md:
+[radoskoppl/sejmbench](https://github.com/radoskoppl/sejmbench).
 
 ## Install
 
 ### Via skills.sh
 
 ```bash
-npx skills add patrykorwat/basal-skills --skill sejmbench
+npx skills add patrykorwat/basal-skills --skill basal
 ```
 
 Select your agent when prompted. Installation is project-local by default;

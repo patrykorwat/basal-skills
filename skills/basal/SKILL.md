@@ -10,9 +10,12 @@ metadata:
 
 # basal
 
-Engage the **basal** Polish AI community (Discord group) — thread tracking,
-content discipline, and outreach workflows (current thread: SejmBench,
-`github.com/radoskoppl/sejmbench`).
+Improve the **basal** community's decision-making process (Discord group) —
+grounded in decision-systems research (`references/decision-systems-map.md`)
+and the community's own experience: capture proposals and outcomes in a
+decision register, track the current thread (decision systems for
+parliaments; SejmBench, `github.com/radoskoppl/sejmbench`, is the measurement
+layer), and keep community-facing content disciplined.
 
 ## Decision-systems landscape (read before writing on the topic)
 
