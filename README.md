@@ -11,6 +11,16 @@ The SejmBench benchmark (the measurement layer for parliamentary decisions)
 lives in its own repo, with its own SKILL.md:
 [radoskoppl/sejmbench](https://github.com/radoskoppl/sejmbench).
 
+## Plugins
+
+| Plugin | Purpose |
+|---|---|
+| [basal-register](plugins/basal-register/README.md) | Hermes desktop pane: live decision register for the basal community (propose → decide → review; markdown export) |
+
+Install: copy `plugins/basal-register/plugin.js` to
+`<hermes-home>/desktop-plugins/basal-register/plugin.js`, then run
+**Reload desktop plugins** from the command palette (⌘K).
+
 ## Install
 
 ### Via skills.sh
