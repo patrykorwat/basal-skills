@@ -8,10 +8,6 @@ grounded in decision-systems research and the community's own experience.
 | [basal-strategies](skills/basal-strategies/SKILL.md) | Decision-process improvement for basal (Discord): decision methods playbook, literature map, decision register, thread tracking, content discipline |
 | [basal-omni](skills/basal-omni/SKILL.md) | Using basal models on media (images, scans, recordings): model routing, question templates, confidence thresholds, evaluation on your own data |
 
-The SejmBench benchmark (the measurement layer for parliamentary decisions)
-lives in its own repo, with its own SKILL.md:
-[radoskoppl/sejmbench](https://github.com/radoskoppl/sejmbench).
-
 ## Plugins
 
 | Plugin | Purpose |

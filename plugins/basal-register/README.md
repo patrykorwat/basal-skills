@@ -6,7 +6,7 @@ decision register at hand:
 - propose an item (BASAL-NNN, timestamped)
 - decide it (sets status + a review date +30d)
 - review outcomes (worked / partial / failed)
-- copy the whole register as markdown (matches `decision-register.md`)
+- copy the whole register as markdown (plain decision-register format)
 
 ## Install
 

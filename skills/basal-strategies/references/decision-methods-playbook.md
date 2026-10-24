@@ -6,8 +6,8 @@ receipts, the traps.** Papers are cited only as receipts — you do not need to
 open arXiv to run any of this.
 
 How to use: identify your decision situation below, run the steps as written,
-record the outcome in the decision register (`decision-register.md`) with a
-review date. Come back to the map only when you want the receipts.
+record the outcome in the decision register with a review date. Come back to
+the map only when you want the receipts.
 
 ## 1. Yes/no group decision (the default case)
 
@@ -132,8 +132,7 @@ Evidence: 2312.14877, 2505.05016, 2604.07667, 2508.08242, 2606.31762,
 
 ## 8. Deciding on the process itself
 
-Method: **register + review + supersede** (`decision-register.md`;
-2605.23628).
+Method: **register + review + supersede** (2605.23628).
 
 1. Every process decision gets a register entry with a review date.
 2. Reviews are honest: worked / partial / failed — failures stay in the
