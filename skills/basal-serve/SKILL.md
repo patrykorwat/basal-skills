@@ -1,7 +1,7 @@
 ---
 name: basal-serve
 description: Use when a task needs a typed, calibrated decision from a local basal server (text, image, scan, screenshot or audio up to 30 seconds), when choosing between basal-2.0 (text) and basal-omni (media) models, writing basal questions with allowed answers, fitting confidence thresholds, or evaluating basal on the user's own data. Trigger on basal-serve, basal-2.0, basal-omni, POST /v1/systemone, /v1/basal, decision from a document photo, classification of a recording, extraction of fields from document text, verification of claims against a source. Use it even if the user does not name the model but asks for a local, calibrated, multiple-choice decision from text or media.
-version: 0.5.1
+version: 0.5.2
 author: Radoskop
 license: MIT
 metadata:
@@ -28,8 +28,10 @@ as part of the task and copy JSON shapes from it, never from memory:
   media: [OMNI.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/OMNI.md);
   calibration: [CALIBRATION.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/CALIBRATION.md);
   serving: [INSTALL.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/INSTALL.md).
-- Model, benchmark and serving pages: [basal.si5.pl/models](https://basal.si5.pl/models/) and
-  [basal.si5.pl/serwer-inferencji](https://basal.si5.pl/serwer-inferencji/).
+- Model choice, serving, benchmarks and examples: [basal.si5.pl](https://basal.si5.pl/),
+  [serwer-inferencji](https://basal.si5.pl/serwer-inferencji/),
+  [benchmark](https://basal.si5.pl/benchmark/) and
+  [zastosowania](https://basal.si5.pl/zastosowania/).
 - If live access is unavailable, say so and leave out version-dependent
   details rather than guessing them.
 
@@ -130,10 +132,10 @@ Check in order: the payload as actually sent; the state (could a person
 answering from it alone make the call?); whether the right answer is among
 the options; the question scope (can it be broken into smaller judgments);
 the wording. A `422 ... 0 options` or field error usually means the running
-server is older than the templates (task expansion arrived in 2.4 — check
-`release_date` in `/v1/models`); compare versions first, field names
-second. A template counts as "Tested" only with a dated, reproducible run
-against a live server — say so when claiming it.
+server is older than the templates — read `release_date` from `/v1/models`
+and compare versions first, field names second. A template counts as
+"Tested" only with a dated, reproducible run against a live server — say so
+when claiming it.
 
 ## Privacy
 
