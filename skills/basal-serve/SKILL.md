@@ -1,7 +1,7 @@
 ---
 name: basal-serve
 description: Use when a task needs a typed, calibrated decision from a local basal server (text, image, scan, screenshot or audio up to 30 seconds), when choosing between basal-2.0 (text) and basal-omni (media) models, writing basal questions with allowed answers, fitting confidence thresholds, or evaluating basal on the user's own data. Trigger on basal-serve, basal-2.0, basal-omni, POST /v1/systemone, /v1/basal, decision from a document photo, classification of a recording, extraction of fields from document text, verification of claims against a source. Use it even if the user does not name the model but asks for a local, calibrated, multiple-choice decision from text or media.
-version: 0.3.3
+version: 0.5.0
 author: Radoskop
 license: MIT
 metadata:
@@ -10,125 +10,128 @@ metadata:
 
 # basal-serve
 
-Guidance for using the basal decision models through a local `basal-serve`.
-Basal returns a choice among answers that the caller defines, with
-calibrated probabilities; it does not write free text. Two families:
-**basal-2.0** for text-only decisions, **basal-omni** for media. The engine
-is at 2.4.1 (2026-10-23); models move fast, so the live docs beat this file.
+Basal answers typed questions about state you supply — a Choice among
+options you define, a Noul (probability a statement is true), a Score on
+levels, a Multi, an Act or Tool with error costs — returning calibrated
+probabilities. It does not write free text. **basal-2.0** for text-only
+decisions, **basal-omni** for media. Companion skill `basal-strategies`
+covers the community decision process; this skill covers the connection.
 
-Companion skill: `basal-strategies` covers the community decision process
-(when to ask, methods, register). This skill covers the connection: what to
-send, to which model, with which guarantee. Shared principles — sources,
-frozen definitions, no machine paths, owner approval before publishing —
-are in the repository README.
+## Live docs first
 
-## Read the live docs first
+The engine and models change faster than this file. Read the relevant page
+as part of the task and copy JSON shapes from it, never from memory:
 
-- Start with the model and server pages: <https://basal.si5.pl/models/> and
-  <https://basal.si5.pl/serwer-inferencji/> (schema reference included).
-  For engine internals, read the raw docs targeted:
-  `https://raw.githubusercontent.com/rkinas/basal/main/docs/API.md`,
-  `TASKS.md`, `OMNI.md`, `CALIBRATION.md`, `INSTALL.md`.
-- Before writing an integration, read the current API page and the schema
-  section relevant to the design; copy JSON shapes from the docs, never
-  from memory.
-- If live access is unavailable, use the local references below, state that
-  limitation, and avoid inventing version-dependent details.
-
-| Task | Start here |
-|---|---|
-| Pick a family and model | `references/model-routing.md`, then the live model page |
-| Write the request | `references/query-templates.md`, then `docs/API.md` |
-| Choose or fit a threshold | `references/evaluation-protocol.md`, then `docs/CALIBRATION.md` |
-| Diagnose a failure | Versions section below, then `references/tested-results.md` |
+- API reference (request/response, question types, extensions):
+  `https://raw.githubusercontent.com/rkinas/basal/main/docs/API.md`; task
+  types: `TASKS.md`; media: `OMNI.md`; calibration: `CALIBRATION.md`;
+  serving: `INSTALL.md`.
+- Model, benchmark and serving pages: <https://basal.si5.pl/models/> and
+  <https://basal.si5.pl/serwer-inferencji/>.
+- If live access is unavailable, say so and leave out version-dependent
+  details rather than guessing them.
 
 ## Workflow
 
-1. Check the input. Text only → basal-2.0, not omni. Read
-   `references/model-routing.md` to pick family and model.
-2. Define the questions and the allowed answers before running anything.
-   Read `references/query-templates.md`. Freeze the category list under a
-   version label.
-3. If a confidence threshold is needed, fit it on labeled examples from the
-   user's own process (`basal-calibrate`). Read
-   `references/evaluation-protocol.md`. Never reuse a text threshold for
-   media.
-4. Run inference locally:
-   `basal-serve --model <weights> --mode eager --media on --port 8000`
-   (media only; text runs in vllm mode). Media travel in the `media` field
-   of the HTTP request (base64). Record model name, engine version, mode
-   and calibration file with every result.
-5. Route results below the threshold to a human (`act` or `tool` questions
-   with `max_error`, which answer `"deferred": true`). The error target must
-   come from calibration on your labeled data and your cost of a wrong
-   action — the 0.05 seen in examples is a placeholder, not a default.
-   Report counts of automatic and escalated cases separately.
-6. Publish nothing community-facing without explicit owner approval of the
-   exact text.
+1. **Start from the decision logic.** Write the truth table or rules that
+   decide the outcome; list their inputs. Inputs needing language or media
+   understanding make good questions; arithmetic, dates and exact lookups
+   belong in code. Give every combination of answers an outcome, including
+   the case where a Noul lands between thresholds.
+2. **Define the questions and allowed answers before running anything.**
+   Freeze the wording and label list under a version label (`codebook v1`);
+   change it only by creating `v2`, never silently.
+3. **Test on the user's real data** before adopting anything: representative
+   cases, hard cases, and cases whose answer is "no" or "nothing fits".
+   Fit any threshold with `basal-calibrate` on labeled examples — see
+   Confidence below. Record model name, weights revision, engine version,
+   mode and calibration file with every result.
+4. **Route uncertain cases to a human** (`act`/`tool` with `max_error`
+   answering `"deferred": true`). Report automatic and escalated counts
+   separately. Publish nothing community-facing without owner approval of
+   the exact text.
 
-## Hard limits to state to the user
+## Writing questions
 
-1. Audio: WAV, FLAC, OGG or MP3, at most 30 s per clip; at most 8 media items
-   and 20 MB each per request. Longer recordings must be cut by the
-   application.
-2. No video input. The application extracts frames and the audio track first.
-3. The ultra model (31B) reads text and images only, with no audio. Every
-   `-GGUF`, `-MLX` and `-FP8` port is text only.
-4. Media need an NVIDIA GPU, `--mode eager --media on`, bf16 weights.
-   Approximate memory: mini ~16 GB, max ~24 GB, ultra 59 GB of weights (an
-   80 GB card for long states). Text-only basal-2.0 also runs on Mac (MLX),
-   Ollama and llama.cpp; pico has an 812 MB GGUF that runs on CPU.
-5. Omni's calibration comes from text; media answers carry
-   `"calibration": "text"`. Its confidence values on images and audio are
-   unverified until tested on the user's data.
-6. Media benchmark results come from small samples (5 runs per modality). Do
-   not present them as general accuracy.
-7. Werdykt measures text decisions only — every model, including omni, gets
-   text there. Never quote it as the quality of image or audio reading.
-8. MCP tools have no media parameter; images and audio go through the HTTP
-   API only.
+- List allowed answers explicitly; include "none of these" or "not
+determinable" when media may be unreadable.
+- One judgment per question. Two conditions joined by "or"/"and" work better
+  as two questions; ask a Noul per statement when more than one can be true
+  (a Choice would split probability between them).
+- Ask the concrete, observable thing a person could point to; write plainly
+  — option descriptions belong in `criteria`, not in the question.
+- Bundle questions that share the state into one request (SOAM): the state
+  is read once and questions run in parallel. Questions cannot see each
+  other's answers, so context belongs in the state or in that question.
+- Write questions in the language of the media; pass `"lang"` when the state
+  text does not show it.
+- When a model judges independently of human votes (hybrid confirmation in
+  `basal-strategies`), keep the votes, tallies and discussion out of the
+  `state` entirely.
 
-## Confidence
+## Model routing
 
-A probability from basal is a calibrated score, not a guarantee. Treat it as
-a ranking signal for escalation. A threshold is valid only for the model
-version, question design and data type it was fitted on.
+Re-read the live model page before relying on this; size never replaces a
+test on the actual task.
 
-**Checkable vs value questions.** Calibration means something only where a
-correct answer exists and can be checked later (rule compliance, category,
-claim-vs-source): there, a certified threshold may gate automation. On value
-questions nothing labels the truth, so no `max_error` has empirical basis and
-"confidence" measures the model's assertiveness, not accuracy: report the
-number as an opinion, start no action from it, and never present it as a
-chance of being right. `basal-strategies` owns this distinction; this skill
-enforces it at request level.
+| Input | Family | Notes |
+|---|---|---|
+| Text only | basal-2.0 (mini 1.5B → max 11B) | NVIDIA GPU, Mac MLX, Ollama, llama.cpp; pico 0.8B runs on CPU (812 MB GGUF) |
+| Image, audio, or both | basal-omni (mini 4B, max 12B, ultra 31B) | NVIDIA GPU, `--mode eager --media on`, bf16; mini ~16 GB, max ~24 GB, ultra 59 GB weights |
 
-## Versions
+Omnis: mini reads recordings best, max/ultra read document images best, ultra takes no audio; 1.1-max is the experimental-task build. Decision types and exact fields: `docs/API.md`; escalation semantics: `act`/`tool` with `max_error` refuse below the certified threshold — that is the safe default, not an error.
 
-Models and engine change quickly. Do not copy benchmark numbers into this
-skill or into posts without a link and a read date. Link to the benchmark
-page (`basal.si5.pl/benchmark/`) and the Hugging Face model card, and state
-the date they were read. Record in every result log: model name and weights
-revision, engine version, mode, calibration file, codebook version. Results
-from different versions are not comparable without stating the difference.
+## Hard limits
 
-**Diagnosing 422 before assuming a broken server:** templates were copied
-from engine 2.4.1 docs (read 2026-10-24); a `422 ... 0 options` or field
-error usually means the running server is older than that (check
-`release_date` in `/v1/models` — task expansion arrived in 2.4). Compare
-versions first, field names second, server health last. What actually passed
-on our builds: `references/tested-results.md`.
+1. Audio: WAV/FLAC/OGG/MP3, max 30 s per clip, max 8 media items and 20 MB
+   each per request; longer recordings must be cut by the application.
+2. No video input — the application extracts frames and the audio track.
+3. Ultra (31B) reads text and images only, no audio; every `-GGUF`, `-MLX`
+   and `-FP8` port is text only.
+4. Media need an NVIDIA GPU in `--mode eager --media on` with bf16 weights;
+   media travel base64 in the request. MCP tools have no media parameter —
+   media go through the HTTP API only.
+5. Omni calibration is fitted on text; media answers carry
+   `"calibration": "text"` and their confidence is unverified until tested
+   on the user's data. Published media benchmarks are small samples (5 runs
+   per modality) — never present them as general accuracy. Werdykt measures
+   text decisions only, for every model including omni.
+
+## Confidence and thresholds
+
+A probability is a calibrated ranking signal, not a guarantee, and it is
+valid only for the model version, question design and data type it was
+fitted on. Never reuse a text threshold for images or audio.
+
+**Checkable vs value questions.** Where a correct answer exists and can be
+checked later (rule compliance, category, claim-vs-source), fit a threshold
+with `basal-calibrate` on ≥50 labeled decisions per question type (~100
+planned so fit and held-out sets both work; `basal-calibrate` splits its own
+input 70/30, so keep a separate held-out set), and let it gate automation.
+On value questions nothing labels the truth: report the number as an
+opinion, start no action from it, never present it as a chance of being
+right. Adopt a model only if it beats the user's existing baseline on the
+held-out set at an acceptable escalation rate; repeat after any change of
+model, engine, mode, calibration, wording or label list.
+
+Every reported number needs: sample size, labeling method, model and engine
+version, threshold, and a reproducible link; small samples get that caveat
+in the same sentence.
+
+## When an answer looks wrong
+
+Check in order: the payload as actually sent; the state (could a person
+answering from it alone make the call?); whether the right answer is among
+the options; the question scope (can it be broken into smaller judgments);
+the wording. A `422 ... 0 options` or field error usually means the running
+server is older than the templates (task expansion arrived in 2.4 — check
+`release_date` in `/v1/models`); compare versions first, field names
+second. A template counts as "Tested" only with a dated, reproducible run
+against a live server — say so when claiming it.
 
 ## Privacy
 
-1. Run inference locally. Do not send media to an external API for this
-   purpose.
-2. Voice recordings of people are personal data. Confirm that the speakers
-   consented before processing recordings from the community.
-3. Keep machine paths, hostnames and credentials out of this repository.
-
-## Reporting results
-
-Every reported number needs: sample size, labeling method, model and engine
-version, threshold, and a link to the data or fixture it can be reproduced
-from. If the sample is small, say so in the same sentence as the number.
+Run inference locally; never send media to an external API for this
+purpose. Voice recordings of people are personal data — confirm consent
+before processing community recordings. Keep machine paths, hostnames and
+credentials out of reports and this repository.
