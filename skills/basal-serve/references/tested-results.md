@@ -11,6 +11,7 @@ must point here.
 | 2026-10-24 | same | same | `facts: auto`, text | passed |
 | 2026-10-24 | same | same | `verify` (`/v1/basal`) | failed 422 "0 options" — build predates task expansion; retest on 2.4.1 |
 | 2026-10-24 | same | same | `classify` (`/v1/basal`) | failed 422, same cause |
+| 2026-10-25 | same (2.3.0) | basal-omni-1.0-ultra-FP8 / vllm | `choice` + `noul`, text, real data (2 pinned SejmBench divisions, club-level state) | passed; 4/4 noul probes matched code-computed ground truth at conf >0.9999; `choice` vote-type: tight division correct (0.99998), the uchwała division answered `other` — correct, our criteria lacked a `resolution` label (codebook v2 item) |
 | — | — | — | image / audio media | not tested (ultra-FP8 vllm is text-only) |
 | — | — | — | `score`, `multi`, `tool` | not tested |
 
