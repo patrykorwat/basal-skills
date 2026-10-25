@@ -663,3 +663,9 @@ speed on your own items: `basal-bench --modes eager-fp32 tpu --questions <file.j
   graph per segment and takes longer (14–22 minutes). `fast-nocompile` starts in seconds at about 1.4× the latency.
 - **NVFP4 quality.** With or without calibration, 4-bit weights and activations change about 10% of decisions of this
   model and lower accuracy by about 3 points. Prefer bf16 or FP8 unless batch throughput matters more.
+
+---
+
+<!-- basal-skills engine docs mirror -->
+
+Source: [HARDWARE.md](https://github.com/rkinas/basal/blob/main/docs/HARDWARE.md) (upstream [`rkinas/basal`], commit [`b20f0f9b15`](https://github.com/rkinas/basal/commit/b20f0f9b159f71726459aa98ede1356ab65695fd), fetched 2026-10-25T16:48:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

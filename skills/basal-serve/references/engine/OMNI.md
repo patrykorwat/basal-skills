@@ -297,3 +297,9 @@ Checked 2026-10-10 on Gemma 4 E4B and 12B: served answers against the fp32 reado
 on 1,800 text items, 120 prompts over 2,048 tokens, 310 images, 285 audio clips and their text twins; every split is
 within the bf16 readout's own deviation. On E4B the text answers with
 `--media on` equal those of the earlier text-only engine on the same items.
+
+---
+
+<!-- basal-skills engine docs mirror -->
+
+Source: [OMNI.md](https://github.com/rkinas/basal/blob/main/docs/OMNI.md) (upstream [`rkinas/basal`], commit [`b20f0f9b15`](https://github.com/rkinas/basal/commit/b20f0f9b159f71726459aa98ede1356ab65695fd), fetched 2026-10-25T16:48:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

@@ -176,3 +176,9 @@ to "not stated"), so 1.0-max stays the default; its card has the full comparison
 The `automated` flag uses thresholds certified on the models' own decision tasks. On these new label sets they do
 not hold (at a 1% target, the automated answers were wrong 2–9% of the time): so task answers report `automated` only with
 thresholds fitted for the task (`task_thresholds` in the calibration file).
+
+---
+
+<!-- basal-skills engine docs mirror -->
+
+Source: [TASKS.md](https://github.com/rkinas/basal/blob/main/docs/TASKS.md) (upstream [`rkinas/basal`], commit [`b20f0f9b15`](https://github.com/rkinas/basal/commit/b20f0f9b159f71726459aa98ede1356ab65695fd), fetched 2026-10-25T16:48:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

@@ -18,6 +18,27 @@ REPO = "rkinas/basal"
 RAW = f"https://raw.githubusercontent.com/{REPO}/main/docs/"
 FILES = ["API.md", "TASKS.md", "OMNI.md", "CALIBRATION.md", "INSTALL.md", "HARDWARE.md"]
 UA = {"User-Agent": "basal-skills-docs-sync/1.0"}
+MARKER = "<!-- basal-skills engine docs mirror -->"
+
+
+def with_footer(text: str, name: str, commit: str, fetched: str) -> str:
+    link = f"https://github.com/{REPO}/blob/main/docs/{name}"
+    return (
+        text.rstrip("\n")
+        + "\n\n---\n\n"
+        + MARKER
+        + f"\n\nSource: [{name}]({link}) (upstream [`{REPO}`],"
+        f" commit [`{commit[:10]}`](https://github.com/{REPO}/commit/{commit}),"
+        f" fetched {fetched} UTC). Mirrored by `scripts/sync_docs.py`;"
+        " upstream data, do not edit locally.\n"
+    )
+
+
+def strip_footer(text: str) -> str:
+    base = text.split(MARKER)[0].rstrip("\n")
+    if base.endswith("---"):
+        base = base[:-3].rstrip("\n")
+    return base
 
 
 def get(url: str, binary: bool = False) -> tuple[int, bytes]:
@@ -49,8 +70,10 @@ def main() -> int:
             print(f"error: {name}: HTTP {status}", file=sys.stderr)
             return 2
         dest = OUT / name
-        if not dest.is_file() or dest.read_bytes() != data:
-            dest.write_bytes(data)
+        text = data.decode("utf-8")
+        if (not dest.is_file() or MARKER not in dest.read_text(encoding="utf-8")
+                or strip_footer(dest.read_text(encoding="utf-8")) != strip_footer(text)):
+            dest.write_text(with_footer(text, name, commit, fetched), encoding="utf-8")
             changed.append(name)
 
     manifest = {

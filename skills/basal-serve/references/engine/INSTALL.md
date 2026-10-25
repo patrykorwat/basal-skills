@@ -288,3 +288,9 @@ curl -s localhost:8000/v1/systemone -H 'content-type: application/json' -d '{
   own media before automating with them. Text requests to the same server take the usual text path.
 - Details, memory and what the engine does differently for Gemma 4: [OMNI.md](OMNI.md). Media results:
   the model cards.
+
+---
+
+<!-- basal-skills engine docs mirror -->
+
+Source: [INSTALL.md](https://github.com/rkinas/basal/blob/main/docs/INSTALL.md) (upstream [`rkinas/basal`], commit [`b20f0f9b15`](https://github.com/rkinas/basal/commit/b20f0f9b159f71726459aa98ede1356ab65695fd), fetched 2026-10-25T16:48:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

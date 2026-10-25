@@ -200,3 +200,9 @@ basal-serve --model Remek/basal-2.0-4.5B --mode fast --template-prefix off --cal
 ## MCP
 
 Agents can call the same decisions over the Model Context Protocol: [MCP.md](MCP.md).
+
+---
+
+<!-- basal-skills engine docs mirror -->
+
+Source: [API.md](https://github.com/rkinas/basal/blob/main/docs/API.md) (upstream [`rkinas/basal`], commit [`b20f0f9b15`](https://github.com/rkinas/basal/commit/b20f0f9b159f71726459aa98ede1356ab65695fd), fetched 2026-10-25T16:48:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

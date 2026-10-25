@@ -7,6 +7,11 @@ the workflow.
 
 ## [Unreleased]
 
+- Mirrored engine docs now carry a provenance footer: source link, upstream
+  commit link, fetch date and "upstream data, do not edit locally". The sync
+  script compares content with the footer stripped, so re-runs stay
+  idempotent.
+
 - Engine docs mirror moved into the skill: `docs/engine/` →
   `skills/basal-serve/references/engine/`, so installed skill copies carry
   the offline fallback. Script, workflow, AGENTS.md, hygiene tests and the
