@@ -1,7 +1,7 @@
 ---
 name: basal-serve
 description: Use when a task needs a typed, calibrated decision from a local basal server (text, image, scan, screenshot or audio up to 30 seconds), when choosing between basal-2.0 (text) and basal-omni (media) models, writing basal questions with allowed answers, fitting confidence thresholds, or evaluating basal on the user's own data. Trigger on basal-serve, basal-2.0, basal-omni, POST /v1/systemone, /v1/basal, decision from a document photo, classification of a recording, extraction of fields from document text, verification of claims against a source. Use it even if the user does not name the model but asks for a local, calibrated, multiple-choice decision from text or media.
-version: 0.5.2
+version: 0.6.0
 author: Radoskop
 license: MIT
 metadata:
@@ -84,6 +84,83 @@ test on the actual task.
 | Image, audio, or both | basal-omni (mini 4B, max 12B, ultra 31B) | NVIDIA GPU, `--mode eager --media on`, bf16; mini ~16 GB, max ~24 GB, ultra 59 GB weights |
 
 Omnis: mini reads recordings best, max/ultra read document images best, ultra takes no audio; 1.1-max is the experimental-task build. Decision types and exact fields: [API.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/API.md); escalation semantics: `act`/`tool` with `max_error` refuse below the certified threshold — that is the safe default, not an error.
+
+## Request examples
+
+Shapes copied from `docs/API.md` (see Live docs first) — trust the docs over
+the copies below. Responses carry per-question `probabilities` (calibrated)
+and `confidence` (probability of the chosen answer); `act`/`tool` answers
+below the certified threshold come back `"deferred": true`.
+
+Choice + Noul over one shared state (SOAM — one read, parallel branches):
+
+```jsonc
+{
+  "state": {"message": "My order arrived broken, I want my money back today."},
+  "questions": {
+    "department": {"type": "choice",
+      "instructions": "Which department should handle this message?",
+      "criteria": {"sales": "questions about orders, prices, products",
+                   "claims": "damaged, wrong or missing items, refunds",
+                   "logistics": "delivery dates, couriers, tracking"}},
+    "urgent": {"type": "noul",
+      "instructions": "Does the customer demand an answer or action today?",
+      "criteria": {"true": "a deadline is named or implied ('today', 'right now')",
+                   "false": "no time pressure stated"}}
+  }
+}
+```
+
+Score on described levels:
+
+```jsonc
+{
+  "state": {"ticket": "Third week waiting for a reply, still no refund."},
+  "questions": {
+    "urgency": {"type": "score",
+      "instructions": "How urgent is this ticket?",
+      "criteria": ["routine question, no deadline",
+                   "one concrete issue, no explicit deadline",
+                   "deadline named or repeated contact about one issue",
+                   "deadline passed or escalation threatened"]}
+  }
+}
+```
+
+Multi — several labels may apply:
+
+```jsonc
+{
+  "state": {"issue": "The export button crashes and the docs are outdated."},
+  "questions": {
+    "topics": {"type": "multi",
+      "instructions": "Which issues does this report raise?",
+      "criteria": {"bug": "something does not work as documented",
+                   "docs": "documentation is wrong or outdated",
+                   "performance": "slow but correct"},
+      "threshold": 0.5, "min": 1, "max": 3}
+  }
+}
+```
+
+Act — action with error costs and human escalation:
+
+```jsonc
+{
+  "state": {"request": "Please delete all data we hold about me."},
+  "questions": {
+    "action": {"type": "act",
+      "instructions": "What should happen next?",
+      "criteria": {"delete_now": "clear erasure request, identity known",
+                   "ask_identity": "plausible request, identity not confirmed",
+                   "human": "ambiguous or legally constrained"},
+      "costs": {"delete_now": {"ask_identity": 0.1, "human": 0.1},
+                "ask_identity": {"delete_now": 1.0, "human": 0.05},
+                "human": {"delete_now": 1.0, "ask_identity": 0.05}},
+      "max_error": 0.05}
+  }
+}
+```
 
 ## Hard limits
 

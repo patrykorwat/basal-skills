@@ -13,6 +13,19 @@ the workflow.
   small personal decision tracker whose entries live only in its own
   storage. Desktop plugin 1.0.1.
 
+## [1.2.0] — 2026-10-25
+
+- `basal-serve` rebuilt as a single file (skill 0.6.0): all four
+  reference files dropped — they forked `rkinas/basal` docs (`API.md`,
+  `TASKS.md`, model pages, `CALIBRATION.md`) and rotted with each engine
+  release. One SKILL.md: live-docs-first links to real pages (the
+  `/models/` link was a 404), 4-step workflow, question-writing craft,
+  model routing table, hard limits, calibration protocol with the shipped
+  threshold-certification limits, debug order, and four canonical request
+  examples (choice+noul, score, multi, act).
+- `tested-results.md` removed; "Tested" now means a dated, reproducible
+  run against a live server (AGENTS.md updated).
+
 ## [1.1.0] — 2026-10-24
 
 - `basal-omni` skill renamed to `basal-serve` and broadened: it now covers

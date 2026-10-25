@@ -14,7 +14,7 @@ AGENTS.md / CONTRIBUTING.md  working rules / how to get a change in
 plugin.yaml                  Hermes plugin manifest (version mirrors VERSION)
 __init__.py                  plugin register(ctx): basal_decide, basal_health
 skills/basal-strategies/     decision situations, playbook, evidence map
-skills/basal-serve/           model use: routing, templates, calibration, results log
+skills/basal-serve/           model use: live-docs-first, question craft, routing, calibration
 plugins/deepseek_harness/    MCP stdio bridge + cordis overlay
 plugins/basal-register/      Hermes desktop pane (JS, separate surface)
 tests/                       pytest suite (also enforces the rules below)
@@ -59,8 +59,8 @@ shapes), MINOR adds usable capability, PATCH fixes wording/bugs.
   of the exact text; drafts stay gitignored (`post-*`).
 - Skills stay English; JSON in templates is copied from engine docs — if
   docs change, trust the docs and re-copy.
-- New claims of "tested" require a dated row in
-  `skills/basal-serve/references/tested-results.md`.
+- Claims of "tested" require a dated, reproducible run against a live
+  server; if you cannot point to one, do not claim it.
 
 ## Testing
 
