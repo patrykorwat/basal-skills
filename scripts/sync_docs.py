@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT = ROOT / "docs" / "engine"
+OUT = ROOT / "skills" / "basal-serve" / "references" / "engine"
 REPO = "rkinas/basal"
 RAW = f"https://raw.githubusercontent.com/{REPO}/main/docs/"
 FILES = ["API.md", "TASKS.md", "OMNI.md", "CALIBRATION.md", "INSTALL.md", "HARDWARE.md"]

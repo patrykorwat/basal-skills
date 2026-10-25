@@ -17,7 +17,7 @@ skills/basal-strategies/     decision situations, playbook, evidence map
 skills/basal-serve/           model use: live-docs-first, question craft, routing, calibration
 plugins/deepseek_harness/    MCP stdio bridge + cordis overlay
 plugins/basal-register/      Hermes desktop pane (JS, separate surface)
-docs/engine/                 mirror of rkinas/basal docs (MANIFEST.json: commit + date)
+skills/basal-serve/references/engine/  mirror of rkinas/basal docs (MANIFEST.json: commit + date)
 scripts/sync_docs.py         refreshes the mirror (CI cron opens a PR daily)
 tests/                       pytest suite (also enforces the rules below)
 .github/workflows/ci.yml     CI on every push/PR (Python 3.10 + 3.12)

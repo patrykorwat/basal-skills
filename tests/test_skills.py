@@ -40,7 +40,7 @@ def test_one_skill_per_directory_and_frontmatter_fields():
 def test_referenced_files_exist():
     for name, path in skill_files().items():
         text = path.read_text(encoding="utf-8")
-        for ref in set(re.findall(r"references/([\w.-]+\.md)", text)):
+        for ref in set(re.findall(r"references/([\w./-]+\.md)", text)):
             assert (path.parent / "references" / ref).is_file(), f"{name}: missing references/{ref}"
         for other in set(re.findall(r"`(basal-serve|basal-strategies)`", text)):
             if other != name:
@@ -82,8 +82,8 @@ def test_readable_json_blocks():
 
     checked = 0
     for path in ROOT.rglob("*.md"):
-        if ".git" in path.parts or (ROOT / "docs") in path.parents:
-            continue  # docs/engine is an upstream mirror, not our templates
+        if ".git" in path.parts or ("references" in path.parts and "engine" in path.parts):
+            continue  # upstream engine mirror, not our templates
         text = path.read_text(encoding="utf-8")
         for block in re.findall(r"```json\n(.*?)```", text, re.S):
             json.loads(block)
@@ -97,7 +97,7 @@ def test_readable_json_blocks():
 def test_no_machine_paths_or_secrets_in_shipped_files():
     bad = re.compile(r"(/home/[a-z]+|/Users/|C:\\\\|/opt/data|api[_-]?key\s*[:=]\s*\S{8,}|ghp_[A-Za-z0-9]{20,})")
     for path in list(ROOT.rglob("*.md")) + list(ROOT.rglob("*.py")) + list(ROOT.rglob("*.yml")):
-        if ".git" in path.parts or path.parent == ROOT / "tests" or (ROOT / "docs") in path.parents:
+        if ".git" in path.parts or path.parent == ROOT / "tests" or ("references" in path.parts and "engine" in path.parts):
             continue
         m = bad.search(path.read_text(encoding="utf-8"))
         assert not m, f"{path.relative_to(ROOT)} leaks machine-specific path or secret: {m.group(0)!r}"
@@ -106,7 +106,8 @@ def test_no_machine_paths_or_secrets_in_shipped_files():
 def test_engine_mirror_has_no_secrets():
     """Upstream docs are data, but a mirror must not smuggle credentials."""
     bad = re.compile(r"(api[_-]?key\s*[:=]\s*\S{8,}|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,})")
-    for path in (ROOT / "docs" / "engine").glob("*.md") if (ROOT / "docs" / "engine").is_dir() else []:
+    mirror = ROOT / "skills" / "basal-serve" / "references" / "engine"
+    for path in mirror.glob("*.md") if mirror.is_dir() else []:
         m = bad.search(path.read_text(encoding="utf-8"))
         assert not m, f"{path.relative_to(ROOT)} contains what looks like a secret: {m.group(0)!r}"
 

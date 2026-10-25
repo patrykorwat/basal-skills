@@ -32,8 +32,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B docs/engine-mirror
-          git add docs/engine
-          SHA=$(python3 -c "import json;print(json.load(open('docs/engine/MANIFEST.json'))['commit'][:10])")
+          git add skills/basal-serve/references/engine
+          SHA=$(python3 -c "import json;print(json.load(open('skills/basal-serve/references/engine/MANIFEST.json'))['commit'][:10])")
           git commit -m "chore: mirror rkinas/basal docs ($SHA)"
           git push --force-with-lease origin docs/engine-mirror
           if ! gh pr list --repo "$GITHUB_REPOSITORY" --head docs/engine-mirror --state open --json number | grep -q '"number"'; then

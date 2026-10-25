@@ -7,6 +7,11 @@ the workflow.
 
 ## [Unreleased]
 
+- Engine docs mirror moved into the skill: `docs/engine/` →
+  `skills/basal-serve/references/engine/`, so installed skill copies carry
+  the offline fallback. Script, workflow, AGENTS.md, hygiene tests and the
+  SKILL.md links updated; `test_referenced_files_exist` now validates
+  subdirectory references. Skill 0.7.1.
 - `sync-docs.yml`: corrected the permissions key (`pull-requests`, not
   `pull-request`); the invalid key made the whole workflow fail to parse.
 - `basal-register`: removed the fabricated framing ("keeps the basal
