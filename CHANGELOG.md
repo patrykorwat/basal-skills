@@ -7,6 +7,8 @@ the workflow.
 
 ## [Unreleased]
 
+- `sync-docs.yml`: corrected the permissions key (`pull-requests`, not
+  `pull-request`); the invalid key made the whole workflow fail to parse.
 - `basal-register`: removed the fabricated framing ("keeps the basal
   community's decision register at hand") — there is no community register
   that this pane maintains. It is now documented as what it actually is: a
