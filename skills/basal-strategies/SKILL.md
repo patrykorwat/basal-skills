@@ -12,7 +12,7 @@ metadata:
 
 Decide **what to decide how** — and, when basal models are involved, whether
 to ask them at all. For the technical side (how to ask, which model,
-thresholds) use the companion skill `basal-omni`; this skill owns the
+thresholds) use the companion skill `basal-serve`; this skill owns the
 decision situations, their conditions, and the vocabulary. Status: methods
 are grounded in the literature map, but none has yet run in a real basal
 thread — treat the applicability numbers as untested until one does.
@@ -24,7 +24,7 @@ thread — treat the applicability numbers as untested until one does.
    miscomputes as the group grows.
 2. **The AI judges independently, before human votes are visible to it.**
    Enforce technically: the request `state` must not contain human votes or
-   discussion that reveals them (`basal-omni` states this as a request rule).
+   discussion that reveals them (`basal-serve` states this as a request rule).
 3. **An AI verdict is never decisive.** Agreement of AI majority and human
    majority shortens the process; disagreement always goes to a named human
    tie-breaker who did not vote in the first round. Treating an AI verdict

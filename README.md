@@ -6,7 +6,7 @@ grounded in decision-systems research and the community's own experience.
 | Skill | Purpose |
 |---|---|
 | [basal-strategies](skills/basal-strategies/SKILL.md) | Decision-process improvement for basal (Discord): decision methods playbook, literature map, decision register, thread tracking, content discipline |
-| [basal-omni](skills/basal-omni/SKILL.md) | Using basal models on media (images, scans, recordings): model routing, question templates, confidence thresholds, evaluation on your own data |
+| [basal-serve](skills/basal-serve/SKILL.md) | Using basal models on text or media (images, scans, recordings): model routing, question templates, confidence thresholds, evaluation on your own data |
 
 ## Plugins
 
@@ -43,7 +43,7 @@ hermes plugins install https://github.com/patrykorwat/basal-skills
 ```
 
 Requires a running `basal-serve` for the tools to answer (see the
-basal-omni skill for start-up commands); `basal_health` tells you when it is
+basal-serve skill for start-up commands); `basal_health` tells you when it is
 up. Verified with `hermes plugins doctor`: manifest, import, registration of
 2 tools + 2 skills, no warnings.
 
@@ -53,7 +53,7 @@ up. Verified with `hermes plugins doctor`: manifest, import, registration of
 
 ```bash
 npx skills add patrykorwat/basal-skills --skill basal-strategies
-npx skills add patrykorwat/basal-skills --skill basal-omni   # media decisions
+npx skills add patrykorwat/basal-skills --skill basal-serve   # media decisions
 ```
 
 Select your agent when prompted. Installation is project-local by default;

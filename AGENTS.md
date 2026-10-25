@@ -10,10 +10,11 @@ the exception and stay untracked).
 ```
 VERSION                      project version (single source of truth)
 CHANGELOG.md                 every change gets an entry
+AGENTS.md / CONTRIBUTING.md  working rules / how to get a change in
 plugin.yaml                  Hermes plugin manifest (version mirrors VERSION)
 __init__.py                  plugin register(ctx): basal_decide, basal_health
 skills/basal-strategies/     decision situations, playbook, evidence map
-skills/basal-omni/           model use: routing, templates, calibration, results log
+skills/basal-serve/           model use: routing, templates, calibration, results log
 plugins/deepseek_harness/    MCP stdio bridge + cordis overlay
 plugins/basal-register/      Hermes desktop pane (JS, separate surface)
 tests/                       pytest suite (also enforces the rules below)
@@ -59,7 +60,7 @@ shapes), MINOR adds usable capability, PATCH fixes wording/bugs.
 - Skills stay English; JSON in templates is copied from engine docs — if
   docs change, trust the docs and re-copy.
 - New claims of "tested" require a dated row in
-  `skills/basal-omni/references/tested-results.md`.
+  `skills/basal-serve/references/tested-results.md`.
 
 ## Testing
 

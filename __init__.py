@@ -35,7 +35,7 @@ def _post(url: str, path: str, payload: dict, timeout: int = 300) -> dict:
             "ok": False,
             "error": f"{type(exc).__name__}: {exc}",
             "hint": f"is basal-serve running at {url}? Start it per the "
-            "basal-omni skill (eager --media on for media requests).",
+            "basal-serve skill (eager --media on for media requests).",
         }
 
 
@@ -153,7 +153,7 @@ DECIDE_SCHEMA = {
         "extract via /v1/basal. Media (images/audio up to 30 s) travel as "
         "local file paths and are base64-encoded here. Answers carry "
         "calibrated probabilities; media answers carry calibration=text and "
-        "need validation on your own data first. Load the basal-omni skill "
+        "need validation on your own data first. Load the basal-serve skill "
         "for question design and thresholds before automating."
     ),
     "parameters": {

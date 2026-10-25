@@ -1,5 +1,5 @@
 name: basal-skills
-version: 1.0.0
+version: 1.1.0
 description: >-
   Basal decision models for Hermes: typed, calibrated decisions through a
   local basal-serve (basal_decide, basal_health) plus the bundled skills

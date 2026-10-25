@@ -12,7 +12,7 @@ The bridge reuses the tool logic from the repo-root `__init__.py` (the same
 code the Hermes plugin registers), so behaviour stays identical across
 surfaces. No npm, no pip, no build — only a system `python3` (3.10+) on
 PATH and a running `basal-serve` for the tools to answer (check with
-`basal_health`; the basal-omni skill has the start-up commands).
+`basal_health`; the basal-serve skill has the start-up commands).
 
 ## Files
 

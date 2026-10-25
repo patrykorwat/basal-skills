@@ -5,6 +5,16 @@ in `VERSION`; the Hermes plugin (`plugin.yaml`) always mirrors it; each skill
 carries its own version, bumped when its content changes. See `AGENTS.md` for
 the workflow.
 
+## [1.1.0] — 2026-10-24
+
+- `basal-omni` skill renamed to `basal-serve` and broadened: it now covers
+  both families (basal-2.0 text models with a size/deployment table, and
+  basal-omni media), live-docs-first reading order and a task→reference
+  start table (pattern from typesafe-ai/skills). Reference files renamed:
+  `model-routing.md`, `query-templates.md`, `evaluation-protocol.md`.
+- `CONTRIBUTING.md` added (contribution types, pre-flight checks, PR flow,
+  review, releases).
+
 ## [1.0.0] — 2026-10-24
 First versioned release; before this date the history is:
 

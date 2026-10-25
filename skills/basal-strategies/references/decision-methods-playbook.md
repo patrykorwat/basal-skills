@@ -30,7 +30,7 @@ to confirm: the AI's verdict is advisory only (hard rule 4 of SKILL.md).
    independently — anonymous, no seeing others' votes first.
 2. Get one AI judgment: a model reads the same options and votes
    independently. Do not show it the human votes first — enforce this in
-   the request `state`, not just in intent (`basal-omni` states it as a
+   the request `state`, not just in intent (`basal-serve` states it as a
    request rule).
 3. If the human majority and the AI agree → accept, skip the debate.
    "Agree" means: the AI's verdict equals the human majority verdict on the

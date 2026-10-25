@@ -42,15 +42,15 @@ def test_referenced_files_exist():
         text = path.read_text(encoding="utf-8")
         for ref in set(re.findall(r"references/([\w.-]+\.md)", text)):
             assert (path.parent / "references" / ref).is_file(), f"{name}: missing references/{ref}"
-        for other in set(re.findall(r"`(basal-omni|basal-strategies)`", text)):
+        for other in set(re.findall(r"`(basal-serve|basal-strategies)`", text)):
             if other != name:
                 assert (ROOT / "skills" / other / "SKILL.md").is_file(), f"{name}: dangling link to {other}"
 
 
 def test_mutual_crosslink_between_skills():
     texts = {name: p.read_text(encoding="utf-8") for name, p in skill_files().items()}
-    assert "basal-omni" in texts["basal-strategies"], "basal-strategies must point at basal-omni"
-    assert "basal-strategies" in texts["basal-omni"], "basal-omni must point at basal-strategies"
+    assert "basal-serve" in texts["basal-strategies"], "basal-strategies must point at basal-serve"
+    assert "basal-strategies" in texts["basal-serve"], "basal-omni must point at basal-strategies"
 
 
 def test_readable_json_blocks():

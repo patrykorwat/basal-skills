@@ -1,41 +1,63 @@
 ---
-name: basal-omni
-description: Use when a task needs a typed decision from an image, scan, screenshot or audio recording (up to 30 seconds), or when choosing between basal-2.0 and basal-omni models, writing basal questions with allowed answers, fitting confidence thresholds, or evaluating basal on the user's own data. Trigger on basal-omni, basal-serve, POST /v1/systemone, decision from a document photo, classification of a recording, extraction of fields from a scan, verification of claims against a source. Use it even if the user does not name the model but asks for a local, calibrated, multiple-choice decision from media.
-version: 0.2.0
+name: basal-serve
+description: Use when a task needs a typed, calibrated decision from a local basal server (text, image, scan, screenshot or audio up to 30 seconds), when choosing between basal-2.0 (text) and basal-omni (media) models, writing basal questions with allowed answers, fitting confidence thresholds, or evaluating basal on the user's own data. Trigger on basal-serve, basal-2.0, basal-omni, POST /v1/systemone, /v1/basal, decision from a document photo, classification of a recording, extraction of fields from document text, verification of claims against a source. Use it even if the user does not name the model but asks for a local, calibrated, multiple-choice decision from text or media.
+version: 0.3.0
 author: Radoskop
 license: MIT
 metadata:
-  tags: [basal, basal-omni, decisions, multimodal, calibration, inference]
+  tags: [basal, basal-serve, basal-2.0, basal-omni, decisions, calibration, inference]
 ---
 
-# basal-omni
+# basal-serve
 
-Guidance for using the basal decision models on media input. basal-omni
-receives text, images or audio and returns a choice among answers that the
-caller defines, with calibrated probabilities. It does not write free text.
-The models are experimental; the engine is at 2.4.1 (2026-10-23), and ultra
-and 1.1-max joined the omni family on 2026-10-17.
+Guidance for using the basal decision models through a local `basal-serve`.
+Basal returns a choice among answers that the caller defines, with
+calibrated probabilities; it does not write free text. Two families:
+**basal-2.0** for text-only decisions, **basal-omni** for media. The engine
+is at 2.4.1 (2026-10-23); models move fast, so the live docs beat this file.
 
 Companion skill: `basal-strategies` covers the community decision process
-(Discord, methods, register). This skill covers model use. Shared principles — sources,
-frozen definitions, no machine paths, owner approval before publishing — are
-in the repository README.
+(when to ask, methods, register). This skill covers the connection: what to
+send, to which model, with which guarantee. Shared principles — sources,
+frozen definitions, no machine paths, owner approval before publishing —
+are in the repository README.
+
+## Read the live docs first
+
+- Start with the model and server pages: <https://basal.si5.pl/models/> and
+  <https://basal.si5.pl/serwer-inferencji/> (schema reference included).
+  For engine internals, read the raw docs targeted:
+  `https://raw.githubusercontent.com/rkinas/basal/main/docs/API.md`,
+  `TASKS.md`, `OMNI.md`, `CALIBRATION.md`, `INSTALL.md`.
+- Before writing an integration, read the current API page and the schema
+  section relevant to the design; copy JSON shapes from the docs, never
+  from memory.
+- If live access is unavailable, use the local references below, state that
+  limitation, and avoid inventing version-dependent details.
+
+| Task | Start here |
+|---|---|
+| Pick a family and model | `references/model-routing.md`, then the live model page |
+| Write the request | `references/query-templates.md`, then `docs/API.md` |
+| Choose or fit a threshold | `references/evaluation-protocol.md`, then `docs/CALIBRATION.md` |
+| Diagnose a failure | Versions section below, then `references/tested-results.md` |
 
 ## Workflow
 
 1. Check the input. Text only → basal-2.0, not omni. Read
-   `references/omni-routing.md` to pick a model.
+   `references/model-routing.md` to pick family and model.
 2. Define the questions and the allowed answers before running anything.
-   Read `references/omni-query-templates.md`. Freeze the category list under
-   a version label.
+   Read `references/query-templates.md`. Freeze the category list under a
+   version label.
 3. If a confidence threshold is needed, fit it on labeled examples from the
    user's own process (`basal-calibrate`). Read
-   `references/omni-evaluation-protocol.md`. Never reuse a text threshold for
+   `references/evaluation-protocol.md`. Never reuse a text threshold for
    media.
 4. Run inference locally:
-   `basal-serve --model Remek/basal-omni-1.0-mini --mode eager --media on --port 8000`;
-   media travel in the `media` field of the HTTP request (base64). Record
-   model name, engine version, mode and calibration file with every result.
+   `basal-serve --model <weights> --mode eager --media on --port 8000`
+   (media only; text runs in vllm mode). Media travel in the `media` field
+   of the HTTP request (base64). Record model name, engine version, mode
+   and calibration file with every result.
 5. Route results below the threshold to a human (`act` or `tool` questions
    with `max_error`, which answer `"deferred": true`). The error target must
    come from calibration on your labeled data and your cost of a wrong
@@ -54,7 +76,8 @@ in the repository README.
    `-GGUF`, `-MLX` and `-FP8` port is text only.
 4. Media need an NVIDIA GPU, `--mode eager --media on`, bf16 weights.
    Approximate memory: mini ~16 GB, max ~24 GB, ultra 59 GB of weights (an
-   80 GB card for long states).
+   80 GB card for long states). Text-only basal-2.0 also runs on Mac (MLX),
+   Ollama and llama.cpp; pico has an 812 MB GGUF that runs on CPU.
 5. Omni's calibration comes from text; media answers carry
    `"calibration": "text"`. Its confidence values on images and audio are
    unverified until tested on the user's data.

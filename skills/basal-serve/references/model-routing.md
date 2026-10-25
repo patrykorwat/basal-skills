@@ -12,6 +12,19 @@ change this table — re-read both before relying on it.
 | Text only, smallest | basal-omni-pico | 0.8B (Qwen3.5); CPU or small GPU; text only despite the omni name. |
 | Image, audio, or both with text | basal-omni | mini 4B (Gemma 4 E4B), max 12B, ultra 31B. NVIDIA GPU, `--mode eager --media on`. |
 
+## Which basal-2.0 model (text only)
+
+| Need | Model | Reason |
+|---|---|---|
+| Cheapest, CPU or edge | pico 0.8B (GGUF 812 MB) | Runs on CPU; fine for `choice`/`noul` on short states. |
+| Default on one NVIDIA GPU | mini 1.5B | Good accuracy per watt; start here. |
+| Higher accuracy | 4.5B | Middle ground; same API. |
+| Best text accuracy in the 2.0 line | max 11B | When latency allows. |
+
+Deployment is free-choice: NVIDIA GPU (`fast` mode), Mac with MLX, Ollama,
+llama.cpp — FP8 / GGUF / MLX ports. The decision API is identical to omni,
+so templates transfer unchanged. Size does not replace a task test.
+
 ## Which omni model
 
 | Need | Model | Reason |
@@ -24,7 +37,7 @@ change this table — re-read both before relying on it.
 | Limited memory | mini | About 16 GB; max about 24 GB; ultra 59 GB of bf16 weights. |
 
 Model size does not replace a test on the actual task. Run the evaluation
-protocol (`omni-evaluation-protocol.md`) before choosing.
+protocol (`evaluation-protocol.md`) before choosing.
 
 ## Choosing by decision type
 
@@ -45,4 +58,4 @@ which is the safe default, not an error.
 
 Exact request and response fields: `docs/API.md` in `rkinas/basal`; the task
 shapes: `docs/TASKS.md`. Which types accept which input modality (documented
-vs untested): the compatibility matrix in `omni-query-templates.md`.
+vs untested): the compatibility matrix in `query-templates.md`.

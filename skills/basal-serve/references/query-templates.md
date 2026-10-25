@@ -71,7 +71,7 @@ use the field table below it.
 | field | meaning |
 |---|---|
 | `state` | context text or JSON; empty when the media carries the input |
-| `questions` | named, typed questions (see `omni-routing.md` for the type table) |
+| `questions` | named, typed questions (see `model-routing.md` for the type table) |
 | `media` | list of `{type: image\|audio, data: base64}`; audio WAV/FLAC/OGG/MP3 up to 30 s, max 8 items, 20 MB each |
 | `detail` | `high` reads small print; 1,120 tokens per image instead of 280 |
 | `lang` | `pl` or `en`; needed when the state text does not show the language |
