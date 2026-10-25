@@ -1,7 +1,7 @@
 ---
 name: basal-serve
 description: Use when a task needs a typed, calibrated decision from a local basal server (text, image, scan, screenshot or audio up to 30 seconds), when choosing between basal-2.0 (text) and basal-omni (media) models, writing basal questions with allowed answers, fitting confidence thresholds, or evaluating basal on the user's own data. Trigger on basal-serve, basal-2.0, basal-omni, POST /v1/systemone, /v1/basal, decision from a document photo, classification of a recording, extraction of fields from document text, verification of claims against a source. Use it even if the user does not name the model but asks for a local, calibrated, multiple-choice decision from text or media.
-version: 0.5.0
+version: 0.5.1
 author: Radoskop
 license: MIT
 metadata:
@@ -23,11 +23,13 @@ The engine and models change faster than this file. Read the relevant page
 as part of the task and copy JSON shapes from it, never from memory:
 
 - API reference (request/response, question types, extensions):
-  `https://raw.githubusercontent.com/rkinas/basal/main/docs/API.md`; task
-  types: `TASKS.md`; media: `OMNI.md`; calibration: `CALIBRATION.md`;
-  serving: `INSTALL.md`.
-- Model, benchmark and serving pages: <https://basal.si5.pl/models/> and
-  <https://basal.si5.pl/serwer-inferencji/>.
+  [API.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/API.md);
+  task types: [TASKS.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/TASKS.md);
+  media: [OMNI.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/OMNI.md);
+  calibration: [CALIBRATION.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/CALIBRATION.md);
+  serving: [INSTALL.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/INSTALL.md).
+- Model, benchmark and serving pages: [basal.si5.pl/models](https://basal.si5.pl/models/) and
+  [basal.si5.pl/serwer-inferencji](https://basal.si5.pl/serwer-inferencji/).
 - If live access is unavailable, say so and leave out version-dependent
   details rather than guessing them.
 
@@ -79,7 +81,7 @@ test on the actual task.
 | Text only | basal-2.0 (mini 1.5B → max 11B) | NVIDIA GPU, Mac MLX, Ollama, llama.cpp; pico 0.8B runs on CPU (812 MB GGUF) |
 | Image, audio, or both | basal-omni (mini 4B, max 12B, ultra 31B) | NVIDIA GPU, `--mode eager --media on`, bf16; mini ~16 GB, max ~24 GB, ultra 59 GB weights |
 
-Omnis: mini reads recordings best, max/ultra read document images best, ultra takes no audio; 1.1-max is the experimental-task build. Decision types and exact fields: `docs/API.md`; escalation semantics: `act`/`tool` with `max_error` refuse below the certified threshold — that is the safe default, not an error.
+Omnis: mini reads recordings best, max/ultra read document images best, ultra takes no audio; 1.1-max is the experimental-task build. Decision types and exact fields: [API.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/API.md); escalation semantics: `act`/`tool` with `max_error` refuse below the certified threshold — that is the safe default, not an error.
 
 ## Hard limits
 
@@ -101,7 +103,11 @@ Omnis: mini reads recordings best, max/ultra read document images best, ultra ta
 
 A probability is a calibrated ranking signal, not a guarantee, and it is
 valid only for the model version, question design and data type it was
-fitted on. Never reuse a text threshold for images or audio.
+fitted on. Never reuse a text threshold for images or audio. The shipped
+calibration files certify 5% target thresholds only — no 1% threshold is
+certified except `choice` on basal-2.0-max-GGUF (ollama) — so `max_error:
+0.01` defers everything else; use 0.05 or certify your own
+([CALIBRATION.md](https://raw.githubusercontent.com/rkinas/basal/main/docs/CALIBRATION.md)).
 
 **Checkable vs value questions.** Where a correct answer exists and can be
 checked later (rule compliance, category, claim-vs-source), fit a threshold
