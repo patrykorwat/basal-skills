@@ -5,6 +5,14 @@ in `VERSION`; the Hermes plugin (`plugin.yaml`) always mirrors it; each skill
 carries its own version, bumped when its content changes. See `AGENTS.md` for
 the workflow.
 
+## [Unreleased]
+
+- `basal-register`: removed the fabricated framing ("keeps the basal
+  community's decision register at hand") — there is no community register
+  that this pane maintains. It is now documented as what it actually is: a
+  small personal decision tracker whose entries live only in its own
+  storage. Desktop plugin 1.0.1.
+
 ## [1.1.0] — 2026-10-24
 
 - `basal-omni` skill renamed to `basal-serve` and broadened: it now covers

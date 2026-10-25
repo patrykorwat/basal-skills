@@ -1,12 +1,13 @@
 # basal-register — Hermes desktop plugin
 
-A bottom pane for the Hermes desktop app that keeps the basal community's
-decision register at hand:
+A small bottom pane for the Hermes desktop app: a personal decision
+tracker. Entries live in the pane's own storage; nothing outside the pane
+is read or written.
 
 - propose an item (BASAL-NNN, timestamped)
 - decide it (sets status + a review date +30d)
 - review outcomes (worked / partial / failed)
-- copy the whole register as markdown (plain decision-register format)
+- copy the whole list as markdown (plain BASAL-NNN format)
 
 ## Install
 
@@ -15,5 +16,5 @@ decision register at hand:
 2. In the desktop app: command palette (⌘K) → **Reload desktop plugins**.
 3. The "basal register" pane docks under the conversation.
 
-Data persists in the plugin's own storage. Entries live in the pane until you
-paste the markdown export into the register file.
+Data persists in the plugin's own storage until you paste the markdown
+export wherever you keep your notes.

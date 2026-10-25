@@ -12,7 +12,7 @@ grounded in decision-systems research and the community's own experience.
 
 | Plugin | Purpose |
 |---|---|
-| [basal-register](plugins/basal-register/README.md) | Hermes desktop pane: live decision register for the basal community (propose → decide → review; markdown export) |
+| [basal-register](plugins/basal-register/README.md) | Hermes desktop pane: small personal decision tracker (propose → decide → review; markdown export) |
 
 Install: copy `plugins/basal-register/plugin.js` to
 `<hermes-home>/desktop-plugins/basal-register/plugin.js`, then run

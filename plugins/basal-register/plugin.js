@@ -1,9 +1,10 @@
 /**
  * Basal Register — Hermes desktop plugin.
- * Version: 1.0.0
- * A pane that keeps the basal community's decision register at hand:
- * propose -> decide (auto review date +30d) -> review outcome,
- * with a one-click markdown export in a simple BASAL-NNN register format.
+ * Version: 1.0.1
+ * A small decision tracker pane: propose -> decide (auto review date +30d)
+ * -> review outcome, with a one-click markdown export in a simple
+ * BASAL-NNN format. Generic tool — it tracks entries you enter here,
+ * nothing outside the pane.
  *
  * Install: this file lives at <HERMES_HOME>/desktop-plugins/basal-register/plugin.js
  * Load: "Reload desktop plugins" from the command palette.
@@ -103,7 +104,7 @@ async function copyMarkdown() {
 }
 
 function toMarkdown(list) {
-  const lines = ['# Basal decision register', '']
+  const lines = ['# Basal register', '']
   for (const e of list) {
     lines.push(`## ${e.id} — ${e.title}`)
     lines.push(`- date: ${e.date}`)
