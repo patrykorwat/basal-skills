@@ -1,0 +1,44 @@
+name: Sync engine docs
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # daily, off the round hour
+  workflow_dispatch:        # manual trigger
+
+permissions:
+  contents: write
+  pull-request: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Mirror rkinas/basal docs
+        id: sync
+        run: |
+          set +e
+          python3 scripts/sync_docs.py
+          rc=$?
+          echo "rc=$rc" >> "$GITHUB_OUTPUT"
+          if [ "$rc" -eq 10 ]; then echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+          exit 0
+      - name: Open or update PR
+        if: steps.sync.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B docs/engine-mirror
+          git add docs/engine
+          SHA=$(python3 -c "import json;print(json.load(open('docs/engine/MANIFEST.json'))['commit'][:10])")
+          git commit -m "chore: mirror rkinas/basal docs ($SHA)"
+          git push --force-with-lease origin docs/engine-mirror
+          if ! gh pr list --repo "$GITHUB_REPOSITORY" --head docs/engine-mirror --state open --json number | grep -q '"number"'; then
+            gh pr create --head docs/engine-mirror --title "chore: engine docs mirror update" \
+              --body "Daily docs sync found changes in rkinas/basal docs. Review the diff, then merge; CI enforces the mirror hygiene tests."
+          else
+            gh pr edit docs/engine-mirror --title "chore: engine docs mirror update"
+          fi

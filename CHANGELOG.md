@@ -13,6 +13,25 @@ the workflow.
   small personal decision tracker whose entries live only in its own
   storage. Desktop plugin 1.0.1.
 
+## [1.3.0] — 2026-10-25
+
+- Engine docs mirror: `scripts/sync_docs.py` (stdlib) copies
+  `API/TASKS/OMNI/CALIBRATION/INSTALL/HARDWARE.md` from rkinas/basal into
+  `docs/engine/` with a provenance manifest (upstream commit + UTC date);
+  `.github/workflows/sync-docs.yml` runs it daily at 03:17 UTC and opens or
+  updates a PR when upstream changed. The mirror gives skills an offline
+  fallback with known provenance.
+- `basal-serve` 0.7.0 (Opus review applied): server check (`release_date`)
+  is Workflow step 0; testing and threshold fitting are separate steps; the
+  calibration minimum is now a function of the target error (rule of three,
+  ~60 accepted clean decisions for 5%, ~300 for 1%) instead of a flat ≥50;
+  version-dependent facts carry a read date and engine version; added a
+  minimal "Running the server" section; fetched docs are declared data
+  (field names, not commands); community-publish rule lives only in
+  `basal-strategies`; em dashes replaced.
+- Tests: hygiene and JSON-block scans skip `docs/engine/` (upstream mirror);
+  new test scans the mirror for secrets.
+
 ## [1.2.0] — 2026-10-25
 
 - `basal-serve` rebuilt as a single file (skill 0.6.0): all four

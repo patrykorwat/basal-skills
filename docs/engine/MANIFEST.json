@@ -1,0 +1,13 @@
+{
+  "source": "https://github.com/rkinas/basal/tree/main/docs",
+  "commit": "b20f0f9b159f71726459aa98ede1356ab65695fd",
+  "fetched_utc": "2026-10-25T16:24:26Z",
+  "files": [
+    "API.md",
+    "TASKS.md",
+    "OMNI.md",
+    "CALIBRATION.md",
+    "INSTALL.md",
+    "HARDWARE.md"
+  ]
+}

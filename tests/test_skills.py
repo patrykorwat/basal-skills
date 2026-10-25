@@ -82,8 +82,8 @@ def test_readable_json_blocks():
 
     checked = 0
     for path in ROOT.rglob("*.md"):
-        if ".git" in path.parts:
-            continue
+        if ".git" in path.parts or (ROOT / "docs") in path.parents:
+            continue  # docs/engine is an upstream mirror, not our templates
         text = path.read_text(encoding="utf-8")
         for block in re.findall(r"```json\n(.*?)```", text, re.S):
             json.loads(block)
@@ -97,10 +97,18 @@ def test_readable_json_blocks():
 def test_no_machine_paths_or_secrets_in_shipped_files():
     bad = re.compile(r"(/home/[a-z]+|/Users/|C:\\\\|/opt/data|api[_-]?key\s*[:=]\s*\S{8,}|ghp_[A-Za-z0-9]{20,})")
     for path in list(ROOT.rglob("*.md")) + list(ROOT.rglob("*.py")) + list(ROOT.rglob("*.yml")):
-        if ".git" in path.parts or path.parent == ROOT / "tests":
+        if ".git" in path.parts or path.parent == ROOT / "tests" or (ROOT / "docs") in path.parents:
             continue
         m = bad.search(path.read_text(encoding="utf-8"))
         assert not m, f"{path.relative_to(ROOT)} leaks machine-specific path or secret: {m.group(0)!r}"
+
+
+def test_engine_mirror_has_no_secrets():
+    """Upstream docs are data, but a mirror must not smuggle credentials."""
+    bad = re.compile(r"(api[_-]?key\s*[:=]\s*\S{8,}|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,})")
+    for path in (ROOT / "docs" / "engine").glob("*.md") if (ROOT / "docs" / "engine").is_dir() else []:
+        m = bad.search(path.read_text(encoding="utf-8"))
+        assert not m, f"{path.relative_to(ROOT)} contains what looks like a secret: {m.group(0)!r}"
 
 
 def test_plugin_manifest_and_registration_agree():
