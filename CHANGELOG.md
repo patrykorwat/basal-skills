@@ -7,16 +7,17 @@ the workflow.
 
 ## [Unreleased]
 
-- Mirrored engine docs now carry a provenance footer: source link, upstream
-  commit link, fetch date and "upstream data, do not edit locally". The sync
-  script compares content with the footer stripped, so re-runs stay
-  idempotent.
+## [1.3.1] — 2026-10-25
 
 - Engine docs mirror moved into the skill: `docs/engine/` →
   `skills/basal-serve/references/engine/`, so installed skill copies carry
   the offline fallback. Script, workflow, AGENTS.md, hygiene tests and the
   SKILL.md links updated; `test_referenced_files_exist` now validates
-  subdirectory references. Skill 0.7.1.
+  subdirectory references.
+- Mirrored engine docs now carry a provenance footer: source link, upstream
+  commit link, fetch date and "upstream data, do not edit locally". The sync
+  script compares content with the footer stripped, so re-runs stay
+  idempotent. Skill 0.7.2.
 - `sync-docs.yml`: corrected the permissions key (`pull-requests`, not
   `pull-request`); the invalid key made the whole workflow fail to parse.
 - `basal-register`: removed the fabricated framing ("keeps the basal
