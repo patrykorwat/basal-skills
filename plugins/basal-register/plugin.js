@@ -1,6 +1,5 @@
 /**
  * Basal Register — Hermes desktop plugin.
- * Version: 1.0.1
  * A small decision tracker pane: propose -> decide (auto review date +30d)
  * -> review outcome, with a one-click markdown export in a simple
  * BASAL-NNN format. Generic tool — it tracks entries you enter here,

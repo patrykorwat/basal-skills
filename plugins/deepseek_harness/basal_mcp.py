@@ -13,6 +13,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+try:
+    _VERSION = (ROOT / "VERSION").read_text().strip()
+except OSError:
+    _VERSION = "0.0.0"
 _spec = importlib.util.spec_from_file_location("basal_plugin", ROOT / "__init__.py")
 assert _spec is not None and _spec.loader is not None
 plugin = importlib.util.module_from_spec(_spec)
@@ -61,7 +65,7 @@ def main() -> None:
             _send({"jsonrpc": "2.0", "id": mid, "result": {
                 "protocolVersion": wanted,
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "basal-skills", "version": "0.1.0"}}})
+                "serverInfo": {"name": "basal-skills", "version": _VERSION}}})
         elif method == "tools/list":
             _send({"jsonrpc": "2.0", "id": mid, "result": {"tools": [
                 {"name": name,

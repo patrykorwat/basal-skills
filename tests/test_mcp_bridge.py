@@ -37,6 +37,8 @@ def test_initialize_and_tools_list():
         send(p, rpc("initialize", {"protocolVersion": "2024-11-05", "capabilities": {}}))
         res = recv(p)["result"]
         assert res["serverInfo"]["name"] == "basal-skills"
+        assert res["serverInfo"]["version"] == (
+            BRIDGE.parents[2] / "VERSION").read_text().strip()
         assert res["capabilities"] == {"tools": {}}
         send(p, {"jsonrpc": "2.0", "method": "notifications/initialized"})
         send(p, rpc("tools/list"))

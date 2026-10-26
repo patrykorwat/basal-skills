@@ -1,7 +1,6 @@
 ---
 name: basal-serve
 description: Use when a task needs a typed, calibrated decision from a local basal server (text, image, scan, screenshot or audio up to 30 seconds), when choosing between basal-2.0 (text) and basal-omni (media) models, writing basal questions with allowed answers, fitting confidence thresholds, or evaluating basal on the user's own data. Trigger on basal-serve, basal-2.0, basal-omni, POST /v1/systemone, /v1/basal, decision from a document photo, classification of a recording, extraction of fields from document text, verification of claims against a source. Use it even if the user does not name the model but asks for a local, calibrated, multiple-choice decision from text or media.
-version: 0.7.2
 author: Radoskop
 license: MIT
 metadata:

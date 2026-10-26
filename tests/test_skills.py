@@ -33,7 +33,7 @@ def test_one_skill_per_directory_and_frontmatter_fields():
         fm = frontmatter(path.read_text(encoding="utf-8"))
         assert fm["name"] == name, f"{name}: frontmatter name mismatch"
         assert fm.get("description", "").startswith("Use when "), f"{name}: description must start with a trigger"
-        assert re.match(r"^\d+\.\d+\.\d+$", fm.get("version", "")), f"{name}: bad version"
+        assert "version" not in fm, f"{name}: skills carry no own version — repo VERSION is the single source"
         assert "author" in fm and "license" in fm
 
 

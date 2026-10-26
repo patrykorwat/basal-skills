@@ -20,8 +20,8 @@ Install: copy `plugins/basal-register/plugin.js` to
 
 ## Versioning
 
-The project is versioned (`VERSION`, SemVer) and released as git tags; the
-plugin manifest mirrors it, each skill carries its own version, and
+One version for everything: `VERSION` (SemVer), released as git tags; the
+plugin manifest mirrors it, artifacts carry no versions of their own, and
 `CHANGELOG.md` records every change. The workflow and the enforced rules are
 in [`AGENTS.md`](AGENTS.md) — start there if you are changing this repo.
 

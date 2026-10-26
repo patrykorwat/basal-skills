@@ -23,14 +23,15 @@ tests/                       pytest suite (also enforces the rules below)
 .github/workflows/ci.yml     CI on every push/PR (Python 3.10 + 3.12)
 ```
 
-## Versioning — every change carries a version
+## Versioning — one version for the whole repo
 
-| component | where the version lives | bump rule |
-|---|---|---|
-| project | `VERSION` | release: any batch of changes worth a tag |
-| Hermes plugin | `plugin.yaml` | must equal `VERSION` (test enforces) |
-| skill | frontmatter `version:` | bump on any content change of that skill (test enforces vs last tag) |
-| desktop plugin | header comment + README | bump when `plugin.js` changes |
+`VERSION` (SemVer) is the single source of truth for every artifact here: the
+Hermes plugin (`plugin.yaml` mirrors it, test-enforced), both bundled skills
+(no own `version:` field — the test rejects one), the desktop plugin (no
+version header), and the MCP bridge (reports the repo version in
+`serverInfo`). Releases are git tags `vX.Y.Z`. Bump `VERSION` on any change
+to authored content (test enforces vs last tag); docs/infra changes and the
+engine-docs mirror (tracked by its own `MANIFEST.json`) don't require a bump.
 
 Semver: MAJOR breaks how agents must act (hard rules, endpoints, request
 shapes), MINOR adds usable capability, PATCH fixes wording/bugs.
@@ -38,8 +39,8 @@ shapes), MINOR adds usable capability, PATCH fixes wording/bugs.
 ## Change workflow (checklist)
 
 1. Make the change.
-2. Bump what changed (skill version and/or plugin+VERSION if shipped code
-   changed). Docs-only: no bump, add a CHANGELOG entry under `[Unreleased]`.
+2. Bump `VERSION` (+ `plugin.yaml` mirror) if authored content changed.
+   Docs-only: no bump, add a CHANGELOG entry under `[Unreleased]`.
 3. Add/adjust CHANGELOG entry describing the change.
 4. Run `pytest` locally — it must pass (it also checks version consistency
    and that no machine path or secret entered shipped files).

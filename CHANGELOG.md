@@ -1,11 +1,22 @@
 # Changelog — basal-skills
 
-Format: `Keep a Changelog`, versions follow SemVer. The project version lives
-in `VERSION`; the Hermes plugin (`plugin.yaml`) always mirrors it; each skill
-carries its own version, bumped when its content changes. See `AGENTS.md` for
+Format: `Keep a Changelog`, versions follow SemVer. One version for the whole
+repo: `VERSION` is the single source; the Hermes plugin (`plugin.yaml`) always
+mirrors it, and no artifact carries a version of its own. See `AGENTS.md` for
 the workflow.
 
 ## [Unreleased]
+
+## [1.4.0] — 2026-10-26
+
+### Changed
+
+- One version for the whole repo: skills and the desktop plugin no longer
+  carry their own version numbers; `VERSION` is the only source of truth and
+  the MCP bridge reports it in its `serverInfo` handshake. Versioning tests
+  enforce the new rule: per-artifact version fields are rejected, and any
+  authored-content change since the last tag must bump `VERSION` (the
+  engine-docs mirror is exempt — it is tracked by its own MANIFEST.json).
 
 ## [1.3.1] — 2026-10-25
 

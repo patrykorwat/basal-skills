@@ -6,6 +6,15 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 
+# One version for the whole repo. Docs/infra changes and the mechanical
+# engine-docs mirror don't require a VERSION bump; authored content does.
+DOCS_ONLY = {
+    "VERSION", "plugin.yaml", "CHANGELOG.md", "AGENTS.md", "README.md",
+    "CONTRIBUTING.md", "LICENSE", ".gitignore", "pytest.ini",
+}
+EXEMPT_PREFIXES = (".github/",)
+MIRROR_MARKER = "/references/engine/"
+
 
 def _git(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(
@@ -29,29 +38,42 @@ def test_changelog_contains_current_version():
     assert f"[{v}]" in (ROOT / "CHANGELOG.md").read_text()
 
 
-def test_desktop_plugin_carries_a_version():
+def test_desktop_plugin_carries_no_own_version():
     js = (ROOT / "plugins" / "basal-register" / "plugin.js").read_text()
-    assert re.search(r"Version:\s*\d+\.\d+\.\d+", js)
+    assert not re.search(r"Version:\s*\d+\.\d+\.\d+", js), (
+        "basal-register carries no own version — VERSION is the single source"
+    )
 
 
-def test_skill_versions_bumped_when_content_changed_since_last_tag():
+def test_mcp_bridge_reads_repo_version():
+    src = (ROOT / "plugins" / "deepseek_harness" / "basal_mcp.py").read_text()
+    assert '"version": _VERSION' in src, "serverInfo must report the repo VERSION"
+    assert 'ROOT / "VERSION"' in src, "bridge must read the repo VERSION file"
+
+
+def test_version_bumped_when_authored_content_changed_since_last_tag():
     tag = _git("describe", "--tags", "--abbrev=0")
     if tag.returncode != 0:
         return  # no release tag yet (shallow CI checkout or pre-release)
     tag = tag.stdout.strip()
-    for skill in sorted((ROOT / "skills").iterdir()):
-        changed = _git(
-            "diff", "--name-only", f"{tag}..HEAD", "--", f"skills/{skill.name}/"
-        )
-        if changed.returncode != 0 or not changed.stdout.strip():
-            continue
-        old = _git("show", f"{tag}:skills/{skill.name}/SKILL.md")
-        if old.returncode != 0:
-            continue  # skill added after the tag: its own version is new anyway
-        old_v = re.search(r"^version:\s*(\S+)", old.stdout, re.M)
-        new_v = re.search(r"^version:\s*(\S+)", (skill / "SKILL.md").read_text(), re.M)
-        assert new_v and SEMVER.match(new_v.group(1)), f"{skill.name}: bad version"
-        assert not old_v or old_v.group(1) != new_v.group(1), (
-            f"{skill.name} content changed since {tag} but its version is "
-            f"still {old_v.group(1)} — bump it (AGENTS.md)"
-        )
+    files = _git("diff", "--name-only", f"{tag}..HEAD")
+    if files.returncode != 0 or not files.stdout.strip():
+        return
+    changed = [f for f in files.stdout.splitlines() if f.strip()]
+    authored = [
+        f for f in changed
+        if f not in DOCS_ONLY
+        and not f.startswith(EXEMPT_PREFIXES)
+        and MIRROR_MARKER not in f
+    ]
+    if not authored:
+        return
+    old = _git("show", f"{tag}:VERSION")
+    if old.returncode != 0:
+        return  # tag predates the VERSION file
+    old_v = old.stdout.strip()
+    new_v = (ROOT / "VERSION").read_text().strip()
+    assert old_v != new_v, (
+        f"authored content changed since {tag} but VERSION is still {new_v} "
+        f"— bump it (AGENTS.md); changed: {authored[:5]}"
+    )

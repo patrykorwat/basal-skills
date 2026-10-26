@@ -1,7 +1,6 @@
 ---
 name: basal-strategies
 description: "Use when running or designing a group decision for the basal community (Discord or any channel using basal models): a vote or quorum question, prioritization, budget allocation, delegation, prediction poll, sortition panel, deciding whether an AI may judge a proposal, building or reviewing a decision register, or checking whether a model should be asked at all. Trigger on głosowanie, kworum, rejestr decyzji, ocena propozycji przez AI, decyzja społeczności, sortition, QV, Equal Shares, delegacja."
-version: 1.1.0
 author: Radoskop
 license: MIT
 metadata:
