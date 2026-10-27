@@ -5,18 +5,19 @@ repo: `VERSION` is the single source; the Hermes plugin (`plugin.yaml`) always
 mirrors it, and no artifact carries a version of its own. See `AGENTS.md` for
 the workflow.
 
-## [Unreleased]
+## [1.4.1] — 2026-10-27
 
 ### Changed
 
-- README: the Hermes-plugin section is now a per-host "Plug into your agent"
-  guide, mirroring the open-dream-rsi README: the native Hermes plugin
-  (installed via `hermes plugins install` or the desktop app's
-  **Capabilities → Plugins** — not Settings), the stdlib MCP bridge wired
-  into OpenCode, goose, Codex CLI, Claude Code and Cursor, the DeepSeek
-  Harness bundle, and a skills-only fallback. Fixed the stale bundled-skill
-  name (`basal-skills:basal-omni` → `basal-skills:basal-serve`) in the
-  README and in the plugin manifest description.
+- README: the Hermes-plugin section became a compact per-host install table;
+  the detailed per-host guide (config blocks per agent, verify steps,
+  caveats) moved to `docs/install.md`. The native Hermes plugin is installed
+  via `hermes plugins install` or the desktop app's **Capabilities →
+  Plugins** — not Settings; the stdlib MCP bridge covers OpenCode, goose,
+  Codex CLI, Claude Code, Cursor and the DeepSeek Harness bundle, with a
+  skills-only fallback. Fixed the stale bundled-skill name
+  (`basal-skills:basal-omni` → `basal-skills:basal-serve`) in the README
+  and in the plugin manifest description.
 
 ## [1.4.0] — 2026-10-26
 
