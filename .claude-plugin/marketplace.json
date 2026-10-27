@@ -1,0 +1,12 @@
+{
+  "name": "basal-skills",
+  "description": "Decision tools and skills for the basal models",
+  "owner": {"name": "patrykorwat"},
+  "plugins": [
+    {
+      "name": "basal-skills",
+      "source": "./",
+      "description": "Typed, calibrated decisions from a local basal-serve (basal_decide, basal_health) plus the bundled skills."
+    }
+  ]
+}

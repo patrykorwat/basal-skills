@@ -109,6 +109,27 @@ Verify with `codex mcp list` (or `[mcp_servers.basal-skills]` with
 
 ## Claude Code
 
+Install as a plugin from this repository — one step gives both tools and
+both skills (namespaced `basal-skills:basal-serve`,
+`basal-skills:basal-strategies`); the plugin bundles the MCP bridge through
+`${CLAUDE_PLUGIN_ROOT}`, so no path editing is needed:
+
+```bash
+claude plugin marketplace add patrykorwat/basal-skills
+claude plugin install basal-skills@basal-skills
+```
+
+Inside a session the same works as `/plugin marketplace add …` and
+`/plugin install …`. Inspect with `claude plugin list` and
+`claude plugin details basal-skills`. The manifests carry no `version`
+field on purpose — the repository `VERSION` is the single source of truth,
+so `claude plugin validate` reports a missing-version warning by design.
+After changes to the manifests, validate a checkout: `claude plugin
+validate .`.
+
+No marketplace wanted? The manual route adds just the MCP server from a
+local checkout:
+
 ```bash
 claude mcp add basal-skills -- python3 /ABS/PATH/TO/basal-skills/plugins/deepseek_harness/basal_mcp.py
 ```

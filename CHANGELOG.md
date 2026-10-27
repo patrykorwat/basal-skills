@@ -5,6 +5,21 @@ repo: `VERSION` is the single source; the Hermes plugin (`plugin.yaml`) always
 mirrors it, and no artifact carries a version of its own. See `AGENTS.md` for
 the workflow.
 
+## [1.5.0] — 2026-10-27
+
+### Added
+
+- Claude Code plugin: `.claude-plugin/plugin.json` (manifest with the
+  bundled MCP bridge, `${CLAUDE_PLUGIN_ROOT}`-based) and
+  `.claude-plugin/marketplace.json` (the repository doubles as its own
+  marketplace), so `claude plugin marketplace add patrykorwat/basal-skills`
+  + `claude plugin install basal-skills@basal-skills` installs the two
+  tools and both skills in one step. The manifests carry no `version`
+  field on purpose — `VERSION` stays the single source of truth (repo
+  rule), so `claude plugin validate` warns about the missing version.
+- docs/install.md: the Claude Code section now leads with the plugin
+  route; `claude mcp add` is the manual fallback.
+
 ## [1.4.1] — 2026-10-27
 
 ### Changed

@@ -40,7 +40,7 @@ steps, caveats: [docs/install.md](docs/install.md).
 | OpenCode | `mcp` block in `opencode.json` |
 | goose | `extensions:` block in `~/.config/goose/config.yaml` |
 | Codex CLI | `codex mcp add basal-skills -- python3 <path>/basal_mcp.py` |
-| Claude Code | `claude mcp add basal-skills -- python3 <path>/basal_mcp.py` |
+| Claude Code | plugin from this repo: `/plugin marketplace add patrykorwat/basal-skills` + `/plugin install basal-skills@basal-skills` — or `claude mcp add` (details in docs) |
 | Cursor | `~/.cursor/mcp.json` (or `.cursor/mcp.json` in the project) |
 | DeepSeek Harness | `dsh --patch <path>/basal.cordis.yml web` |
 | No MCP | skills only — see [Install](#install) |

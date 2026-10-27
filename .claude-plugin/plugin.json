@@ -1,0 +1,14 @@
+{
+  "name": "basal-skills",
+  "description": "Typed, calibrated decisions from a local basal-serve: the basal_decide and basal_health tools (bundled MCP bridge) plus the basal-serve and basal-strategies skills.",
+  "author": {"name": "Radoskop"},
+  "license": "MIT",
+  "repository": "https://github.com/patrykorwat/basal-skills",
+  "mcpServers": {
+    "basal-skills": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/plugins/deepseek_harness/basal_mcp.py"],
+      "env": {"BASAL_URL": "http://127.0.0.1:8000"}
+    }
+  }
+}

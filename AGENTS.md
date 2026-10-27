@@ -12,6 +12,7 @@ VERSION                      project version (single source of truth)
 CHANGELOG.md                 every change gets an entry
 AGENTS.md / CONTRIBUTING.md  working rules / how to get a change in
 plugin.yaml                  Hermes plugin manifest (version mirrors VERSION)
+.claude-plugin/              Claude Code manifest + marketplace (repo = one plugin)
 __init__.py                  plugin register(ctx): basal_decide, basal_health
 skills/basal-strategies/     decision situations, playbook, evidence map
 skills/basal-serve/           model use: live-docs-first, question craft, routing, calibration
