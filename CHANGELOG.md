@@ -7,6 +7,17 @@ the workflow.
 
 ## [Unreleased]
 
+### Changed
+
+- README: the Hermes-plugin section is now a per-host "Plug into your agent"
+  guide, mirroring the open-dream-rsi README: the native Hermes plugin
+  (installed via `hermes plugins install` or the desktop app's
+  **Capabilities → Plugins** — not Settings), the stdlib MCP bridge wired
+  into OpenCode, goose, Codex CLI, Claude Code and Cursor, the DeepSeek
+  Harness bundle, and a skills-only fallback. Fixed the stale bundled-skill
+  name (`basal-skills:basal-omni` → `basal-skills:basal-serve`) in the
+  README and in the plugin manifest description.
+
 ## [1.4.0] — 2026-10-26
 
 ### Changed

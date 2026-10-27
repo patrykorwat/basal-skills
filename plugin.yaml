@@ -3,7 +3,7 @@ version: 1.4.0
 description: >-
   Basal decision models for Hermes: typed, calibrated decisions through a
   local basal-serve (basal_decide, basal_health) plus the bundled skills
-  basal-strategies (community decision process) and basal-omni (media
+  basal-strategies (community decision process) and basal-serve (model
   routing, question templates, calibration).
 author: Radoskop
 license: MIT
