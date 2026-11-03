@@ -18,6 +18,9 @@ these task formats. Measured quality is in [Results](#results); check it on your
 Inputs may be structured: a state, instructions, a claim or a label description that is a JSON object or array is
 written into the prompt as compact JSON (this has been true for every question type since 1.5).
 
+A task question is expanded into decision questions named `<name>::<part>`, so in a request with task questions no
+question's name may contain `::` (HTTP 422).
+
 ## classify
 
 ```json
@@ -181,4 +184,4 @@ thresholds fitted for the task (`task_thresholds` in the calibration file).
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [TASKS.md](https://github.com/rkinas/basal/blob/main/docs/TASKS.md) (upstream [`rkinas/basal`], commit [`b20f0f9b15`](https://github.com/rkinas/basal/commit/b20f0f9b159f71726459aa98ede1356ab65695fd), fetched 2026-10-25T16:48:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [TASKS.md](https://github.com/rkinas/basal/blob/main/docs/TASKS.md) (upstream [`rkinas/basal`], commit [`160508223f`](https://github.com/rkinas/basal/commit/160508223f386577188491d5c961179e154d5c91), fetched 2026-11-03T10:52:08Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
