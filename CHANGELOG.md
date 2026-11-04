@@ -5,6 +5,36 @@ repo: `VERSION` is the single source; the Hermes plugin (`plugin.yaml`) always
 mirrors it, and no artifact carries a version of its own. See `AGENTS.md` for
 the workflow.
 
+## [1.7.0] — 2026-11-04
+
+### Added
+
+- Upstream's own agent guide, `skills/basal/SKILL.md`, is now mirrored as
+  `references/engine/UPSTREAM-SKILL.md`. It is upstream's tutorial for calling
+  the engine (state and question craft, question types, presets, coverage /
+  `max_error`, calibrating, escalation) — we mirror it instead of restating
+  it, so it stays one source of truth and arrives with the daily sync.
+- `basal-serve`: a **Presets** section. The engine ships ready question sets
+  (`triage`, `moderation`, `compliance`, `guard_input`, `guard_output`,
+  `route_intent`; `basal-run --list-presets`, `b.guard()`, `b.route()`), and
+  this skill said nothing about them — an agent following it wrote questions
+  from scratch where a preset already fits. Their semantics and the escalation
+  router live in `docs/SERVING.md`, which the mirror does not ship, so the
+  section points there live.
+
+### Changed
+
+- `scripts/sync_docs.py` mirrors a `(upstream path -> local name)` mapping
+  instead of one `docs/` directory, and rewrites every link to a page we do
+  not ship into its absolute upstream URL. The mirror used to carry 9 dead
+  relative links (`SERVING`, `FEATURES`, `QUANTIZATION`, `PORTS`, `SOAM`,
+  `FORMATS`, `GGUF`, `NAVIGATE`, `MCP`); it now resolves or goes upstream, and
+  `tests/test_skills.py` fails if a dead relative link comes back. The
+  comparison against the stored copy is made on the mirrored text, so the
+  rewrite does not make every run look "changed".
+- `MANIFEST.json` gains `sources` (local name -> upstream path).
+- Mirror refreshed to `rkinas/basal` `8e80d3eba0` (2026-11-04).
+
 ## [1.6.1] — 2026-11-04
 
 ### Fixed

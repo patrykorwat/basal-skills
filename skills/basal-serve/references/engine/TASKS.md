@@ -2,10 +2,10 @@
 
 basal 2.1 adds four task types on `POST /v1/basal` (and `/v1/systemone`). They run on the basal models you already serve,
 with no new model: each task question is expanded into the decision types (`choice`, `noul`, `multi`) over the
-request's state, so it shares the state with the request's other questions (one forward pass, [SOAM](SOAM.md)) and uses
+request's state, so it shares the state with the request's other questions (one forward pass, [SOAM](https://github.com/rkinas/basal/blob/main/docs/SOAM.md)) and uses
 the model's calibration. The answer is assembled from those decisions.
 
-*Experimental* (see [FEATURES.md](FEATURES.md)): the API may change in a minor release, and the models were not trained on
+*Experimental* (see [FEATURES.md](https://github.com/rkinas/basal/blob/main/docs/FEATURES.md)): the API may change in a minor release, and the models were not trained on
 these task formats. Measured quality is in [Results](#results); check it on your own data.
 
 | task | what you send | what you get |
@@ -184,4 +184,4 @@ thresholds fitted for the task (`task_thresholds` in the calibration file).
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [TASKS.md](https://github.com/rkinas/basal/blob/main/docs/TASKS.md) (upstream [`rkinas/basal`], commit [`160508223f`](https://github.com/rkinas/basal/commit/160508223f386577188491d5c961179e154d5c91), fetched 2026-11-03T10:52:08Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/TASKS.md`](https://github.com/rkinas/basal/blob/main/docs/TASKS.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

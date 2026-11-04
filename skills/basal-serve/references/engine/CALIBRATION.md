@@ -100,7 +100,7 @@ The shipped files were fitted with the same steps:
    one in log space, in proportion *n* / `--min-per-type` (20 FIT decisions of 50: 40% fitted, 60% shipped), so a few
    dozen labels already move it and the full fit takes over smoothly at `--min-per-type`. With fewer it keeps the
    shipped temperature. The table says which (`(blended)`, `(kept)`).
-   For prompt-format-2 models (see [FORMATS.md](FORMATS.md)) `choice` also gets a temperature per option-count bucket
+   For prompt-format-2 models (see [FORMATS.md](https://github.com/rkinas/basal/blob/main/docs/FORMATS.md)) `choice` also gets a temperature per option-count bucket
    (2–10, 11–26, 27–255 options), fitted the same way where FIT has at least `--min-per-type` decisions in the bucket;
    a bucket with fewer keeps the shipped bucket temperature, else the type temperature applies to it.
 3. For each target error *r*, the threshold is the lowest confidence whose accepted FIT decisions have a one-sided 95%
@@ -170,7 +170,7 @@ confidence is below the type's certified threshold for *r* (step 3 of the method
 
 ## `multi`: the fallback threshold of a label set
 
-A `multi` question with a `fallback` label (see [FEATURES.md](FEATURES.md#label-constraints-exclusive-and-fallback))
+A `multi` question with a `fallback` label (see [FEATURES.md](https://github.com/rkinas/basal/blob/main/docs/FEATURES.md#label-constraints-exclusive-and-fallback))
 often needs its own `fallback_threshold`: a model can under-select a "general" label, so the default rule (p ≥
 `threshold`) leaves those questions empty. Label such questions with the labels that apply:
 
@@ -342,4 +342,4 @@ count (2–255) the `choice` row marks its type temperature `(not served: bucket
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [CALIBRATION.md](https://github.com/rkinas/basal/blob/main/docs/CALIBRATION.md) (upstream [`rkinas/basal`], commit [`160508223f`](https://github.com/rkinas/basal/commit/160508223f386577188491d5c961179e154d5c91), fetched 2026-11-03T10:52:08Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/CALIBRATION.md`](https://github.com/rkinas/basal/blob/main/docs/CALIBRATION.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

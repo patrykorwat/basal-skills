@@ -16,7 +16,7 @@ second with 32 option-order passes per forward (offline) or 32 concurrent client
 decisions whose top option equals the fp32 reference on the same machine (RTX 5090 and RTX 4090: the bf16 reference,
 marked ²). Measured with `basal-bench` / `basal-loadtest` (H100, RTX PRO 6000 and RTX 5090 with the equivalent research
 harness) on a private 500-item sample of the Polish/English test split. Requests with several questions are much
-cheaper than separate requests since basal-1.5: see [SOAM.md](SOAM.md).
+cheaper than separate requests since basal-1.5: see [SOAM.md](https://github.com/rkinas/basal/blob/main/docs/SOAM.md).
 
 ## Engines
 
@@ -31,7 +31,7 @@ measurements):
 | **SGLang** | `sglang` | NVIDIA GPUs | an alternative CUDA server (RadixAttention prefix sharing) | `basal-serve --model Remek/basal-1.5-4.5B --mode sglang` (own environment: `sglang[srt]==0.5.21`, then basal with `--no-deps`) | **verified offline** (one H100, `basal-bench`, 1,000 development decisions): agreement 0.995 with the fp32 engine, accuracy 0.925 vs 0.930, 104.6 decisions/s; on Werdykt the same answer as the basal engine on 98.3% of items (97.0% for states over 8k tokens) |
 | **MLX** | `mlx` (default on a Mac with `basal[mlx]`); `mlx-q8` | Apple Silicon | Macs: `-MLX-8bit` (recommended) or `-MLX-fp4` (half the memory); `mlx-q8` makes 8-bit weights from bf16 at load time | `basal-serve --model Remek/basal-1.5-4.5B-MLX-8bit --mode mlx` (extra `basal[mlx]`) | **verified** on an Apple M4 Pro (500 development decisions): agreement with bf16 0.992 (`-MLX-8bit`) / 0.970 (`-MLX-fp4`), 587 / 581 ms per question |
 | **Ollama** | `ollama` | CPU, Apple Silicon, consumer GPUs | local and desktop use with Ollama (`-GGUF`) | 1. `hf download Remek/basal-1.5-4.5B-GGUF --local-dir basal-1.5-4.5B-GGUF` 2. in that folder: `ollama create basal-1.5-4.5b:q8_0 -f Modelfile.Q8_0` 3. `basal-serve --model ./basal-1.5-4.5B-GGUF --mode ollama --ollama-model basal-1.5-4.5b:q8_0` | **verified** on an Apple M4 Pro (500 development decisions): agreement with bf16 0.994 (`Q8_0`) / 0.980 (`Q4_K_M`), 518 / 542 ms per question |
-| **llama.cpp** | `llamacpp`; `gguf` | CPU, Apple Silicon, consumer GPUs | `llama-server` with the `-GGUF` files; the engine's token ids are sent as is. `--mode gguf --gguf <file>` runs the file in process instead (extra `basal[gguf]`, [GGUF.md](GGUF.md)) | 1. `llama-server -m basal-1.5-4.5B-GGUF/basal-1.5-4.5B-Q8_0.gguf -c 4096 --port 8080` 2. `basal-serve --model ./basal-1.5-4.5B-GGUF --mode llamacpp` | **verified** on an Apple M4 Pro (500 development decisions): agreement with bf16 0.994 (`Q8_0`) / 0.980 (`Q4_K_M`), 427 / 446 ms per question |
+| **llama.cpp** | `llamacpp`; `gguf` | CPU, Apple Silicon, consumer GPUs | `llama-server` with the `-GGUF` files; the engine's token ids are sent as is. `--mode gguf --gguf <file>` runs the file in process instead (extra `basal[gguf]`, [GGUF.md](https://github.com/rkinas/basal/blob/main/docs/GGUF.md)) | 1. `llama-server -m basal-1.5-4.5B-GGUF/basal-1.5-4.5B-Q8_0.gguf -c 4096 --port 8080` 2. `basal-serve --model ./basal-1.5-4.5B-GGUF --mode llamacpp` | **verified** on an Apple M4 Pro (500 development decisions): agreement with bf16 0.994 (`Q8_0`) / 0.980 (`Q4_K_M`), 427 / 446 ms per question |
 
 **`basal-serve` is the decision layer in every row.** vLLM, SGLang, MLX, Ollama and llama.cpp run the weights; the typed answers (a calibrated probability for each of your options, both option orders, the state shared by several questions, `multi`, `act` and `facts`) come from `basal-serve --mode <engine>` in front of them, with the same HTTP API in every mode. A plain `ollama run` or `llama-cli` gives free text only. Evidence spans need the PyTorch engine (`fast`, `eager`); vLLM and SGLang start with a 4,096-token context (longer states are refused); raise it with `--max-len` (e.g. 32768 for long documents). Install and first request for each engine: [install and run](INSTALL.md).
 <!-- /engines -->
@@ -44,7 +44,7 @@ measurements):
 | Workstation / consumer (RTX PRO 6000, RTX 5090) | `fp8` | compute-bound; FP8 gives 1.3–1.4× at 97% agreement |
 | RTX 4090 | `fast` (bf16) | FP8 compilation stalled on our test machine; bf16 works (1.5B: 12.5 ms) |
 | Desktop with unified memory (DGX Spark GB10) | `fp8` | memory-bandwidth-bound; FP8 halves latency |
-| Batched high-throughput serving with vLLM | `vllm` + the `-FP8` checkpoint on Hopper / Ada, the `-NVFP4` checkpoint on Blackwell (RTX 50xx, RTX PRO 6000, B200, DGX Spark); see [QUANTIZATION](QUANTIZATION.md#basal-15-the-modelopt-checkpoints) | basal-1.0 NVFP4: 3.2× throughput on the DGX Spark, but −3 accuracy points; the basal-1.5 checkpoints' agreement and speed: FP8 agrees with the bf16 model on 0.979–0.989 of decisions; NVFP4 on 0.979 for max and 0.937 for basal-1.5 (−2.8 points); no NVFP4 for mini |
+| Batched high-throughput serving with vLLM | `vllm` + the `-FP8` checkpoint on Hopper / Ada, the `-NVFP4` checkpoint on Blackwell (RTX 50xx, RTX PRO 6000, B200, DGX Spark); see [QUANTIZATION](https://github.com/rkinas/basal/blob/main/docs/QUANTIZATION.md#basal-15-the-modelopt-checkpoints) | basal-1.0 NVFP4: 3.2× throughput on the DGX Spark, but −3 accuracy points; the basal-1.5 checkpoints' agreement and speed: FP8 agrees with the bf16 model on 0.979–0.989 of decisions; NVFP4 on 0.979 for max and 0.937 for basal-1.5 (−2.8 points); no NVFP4 for mini |
 | A100 and other GPUs without FP8 (not measured) | `fast` | the bf16 path runs on any sm80+ GPU |
 | RTX 3090 (Ampere, sm_86; measured by @krzysztofkaminski, [#33](https://github.com/rkinas/basal/issues/33)) | `fast` (bf16); `--batches compact` for basal-2.0-mini | basal-2.0-mini 13.4 ms per decision (one option order), 161.6 decisions/s with compact rows at 32 clients; basal-2.0 (4.5B) `fast` fits 24 GB from v2.3.1 (peak 23.1 GB); no `fp8` (torchao needs sm 8.9 or newer; 2.3.2 says so before loading) |
 | Apple Silicon (M-series) | MLX port: `-MLX-8bit` (decisions as with bf16); `-MLX-fp4` for 8 GB Macs (about 1.4 accuracy points less on basal-1.5, 2.0 on max, 3.6 on mini: for mini prefer `-MLX-8bit` or GGUF); without MLX: `gguf` (a `-GGUF` file in process) or `mps` (PyTorch, evidence spans) | see [Apple Silicon](#apple-silicon) |
@@ -145,7 +145,7 @@ machine; `o1` / `o2` = one option order or both (`--orders`).
   (o2) and 98 (o1) with this one.
 - **Two option orders at one client** cost a few ms more than in the earlier engine (mini 26.6 against 23.0 ms; `-FP8`
   basal-1.5 50.1 ms against 28.7 for one order): the branches run in a second, short forward pass (pass 2 in
-  [SOAM.md](SOAM.md#which-kernel-runs)). Under load the two passes are faster (57.5 against 48.9 decisions/s).
+  [SOAM.md](https://github.com/rkinas/basal/blob/main/docs/SOAM.md#which-kernel-runs)). Under load the two passes are faster (57.5 against 48.9 decisions/s).
 - **The `-FP8` checkpoints** run natively in the `fast` mode (the ModelOpt FP8 weights with their static scales, the
   same arithmetic as vLLM): 1.5× the bf16 throughput. Their decisions agree with the bf16 model's on 0.98 (basal-1.5)
   and 0.97 (mini) of development decisions. torchao's on-the-fly FP8 (`--mode fp8` on bf16 weights) gains only 10–20%.
@@ -201,7 +201,7 @@ basal-2.0 (prompt format 2, one option order unless noted), synthetic states of 
 - **FP8 checkpoints** stay unmerged by default. Re-quantising a merged weight per tensor moves FP8 decisions as much as
   the quantisation itself.
 - **The FP8 export** of the prompt-format-2 models keeps the first two and the last two decoder layers in bf16
-  ([QUANTIZATION.md](QUANTIZATION.md#prompt-format-2-models-the-fp8-export)). On FA3, unmerged: 40.95 decisions/s at
+  ([QUANTIZATION.md](https://github.com/rkinas/basal/blob/main/docs/QUANTIZATION.md#prompt-format-2-models-the-fp8-export)). On FA3, unmerged: 40.95 decisions/s at
   16 clients and 26.2 ms at one client (median of three servers, one H100 with no other job), 1.4× the bf16 model in
   the same comparison. Keeping every `down_proj` in bf16 too agrees slightly more often (0.957 against 0.950 on 2–10
   options) at 35.75 decisions/s.
@@ -252,13 +252,13 @@ reference is the bf16 model in PyTorch; for basal-1.5-max, which does not fit a 
 Agreement here is on a 500-decision sample, to check that each port matches its reference; to compare model sizes, see
 the basal-1.5 benchmark table ([v1.5.0 README](https://github.com/rkinas/basal/tree/v1.5.0#other-results)). For basal-1.5-mini use `-MLX-8bit` (1.8 GB, agreement 0.998) or GGUF `Q4_K_M` (1.0 GB, 0.964); its `-MLX-fp4` port costs about 3.6 accuracy points (agreement 0.908, accuracy 0.882 vs 0.918).
 
-Serve with `basal-serve --model Remek/<model>-MLX-8bit --mode mlx` ([QUANTIZATION.md](QUANTIZATION.md#mlx-apple-silicon)). On Apple Silicon a decision is compute-bound (prefill): every MLX format takes about the same time, so the formats differ in memory, not speed; llama.cpp is about 25% faster than MLX on the M4 Pro and Ollama about 10% (basal-1.5). Five questions over one state take 2.1–2.2 s with MLX and 1.7–1.8 s with llama.cpp / Ollama, not five times one question, because the state is computed once.
+Serve with `basal-serve --model Remek/<model>-MLX-8bit --mode mlx` ([QUANTIZATION.md](https://github.com/rkinas/basal/blob/main/docs/QUANTIZATION.md#mlx-apple-silicon)). On Apple Silicon a decision is compute-bound (prefill): every MLX format takes about the same time, so the formats differ in memory, not speed; llama.cpp is about 25% faster than MLX on the M4 Pro and Ollama about 10% (basal-1.5). Five questions over one state take 2.1–2.2 s with MLX and 1.7–1.8 s with llama.cpp / Ollama, not five times one question, because the state is computed once.
 
-For Ollama (GGUF), see [QUANTIZATION.md](QUANTIZATION.md#gguf-for-ollama-and-llamacpp).
+For Ollama (GGUF), see [QUANTIZATION.md](https://github.com/rkinas/basal/blob/main/docs/QUANTIZATION.md#gguf-for-ollama-and-llamacpp).
 
 basal-omni on a Mac: `--mlx-forward basal` (2.5, opt-in) runs the last 19 of 42 layers at the readout rows only; on an
 Apple M4 Pro basal-omni-1.0-mini-MLX answers one question in two orders in 179 instead of 222 ms
-([QUANTIZATION.md](QUANTIZATION.md#mlx-apple-silicon)).
+([QUANTIZATION.md](https://github.com/rkinas/basal/blob/main/docs/QUANTIZATION.md#mlx-apple-silicon)).
 
 basal-omni-pico on a Mac (`--mode mlx`) computes in float32 from its bf16 weights (unless `--mlx-compute bf16`). MLX
 runs float32 matmuls in TF32 on an M5's GPU by default, so basal-serve sets `MLX_ENABLE_TF32=0` when it loads pico for
@@ -424,7 +424,7 @@ ran the prefix and both blocks as one packed forward, and every forward reads al
 (opt-in; [#28](https://github.com/rkinas/basal/pull/28) by Grzegorz Brzezinka). Two orders on the M5 Max (his
 measurement): basal-1.0-4.5B 118 -> 68 ms, basal-2.0-4.5B-MLX-8bit 134 -> 77 ms. On the M4 Pro: basal-1.0-1.5B
 158 -> 130-136 ms, basal-2.0-4.5B-MLX-8bit 379-390 -> 330 ms. Its checks and why it is not the default yet:
-[QUANTIZATION.md](QUANTIZATION.md#mlx-apple-silicon).
+[QUANTIZATION.md](https://github.com/rkinas/basal/blob/main/docs/QUANTIZATION.md#mlx-apple-silicon).
 
 - **Same generation, twice the GPU cores** (M5 Max 40 vs M5 Pro 20, basal-1.0 at `3fa2eea`, 2 orders): bf16 and 8-bit
   modes are 1.35–1.63× faster, `eager-fp32` 1.71–1.88×; the 1.5B gains less than the 4.5B.
@@ -462,10 +462,10 @@ back to `rope_theta` 10000 instead of 1e6: unpatched, the mean TV is 0.10–0.12
 vllm-metal (4.5B–1.5B, max 0.73). They were run on a copy of the checkpoint whose `config.json` also has `"rope_theta": 1000000`
 (basal's own `mlx` backend reads the value itself). ² LM Studio (and Ollama with a GGUF import, and llama-server with
 text prompts) tokenize with the GGUF vocabulary, which splits basal prompts differently from the training tokenizer;
-see [GGUF.md](GGUF.md#other-llamacpp-front-ends-send-token-ids). ³ Measured with the contribution's variant of
+see [GGUF.md](https://github.com/rkinas/basal/blob/main/docs/GGUF.md#other-llamacpp-front-ends-send-token-ids). ³ Measured with the contribution's variant of
 `--mode ollama` for a safetensors import of the original checkpoint, imported from the patched copy of ¹; basal
 1.5's `--mode ollama` serves the `-GGUF` ports, whose tokenizer fix makes Ollama's text tokenization exact
-([PORTS.md](PORTS.md)).
+([PORTS.md](https://github.com/rkinas/basal/blob/main/docs/PORTS.md)).
 
 ![Latency and throughput of every engine](figures/apple_latency_throughput.png)
 
@@ -695,7 +695,7 @@ One Ryzen AI Max+ PRO 395 (Radeon 8060S, gfx1151, 128 GB unified memory; Fedora 
 basal-1.5 (4.5B). On this iGPU a decision is compute-bound prefill (~9.2 GFLOP per token), and the stock kernels reach
 only about half of what the GPU sustains. `--mode strix` is a forward written for it (Triton kernels: flash attention
 over the packed prefix trie, gate / up + SwiGLU fused, matmuls with the bias and the residual add in the epilogue).
-Request matrix over HTTP, p50 (details, profile and method: [benchmarks/STRIX_HALO.md](benchmarks/STRIX_HALO.md)):
+Request matrix over HTTP, p50 (details, profile and method: [benchmarks/STRIX_HALO.md](https://github.com/rkinas/basal/blob/main/docs/benchmarks/STRIX_HALO.md)):
 
 | request | `gguf` (Q8_0, llama.cpp Vulkan) | **`strix`** (bf16) | `fast-nocompile` as shipped |
 |---|---|---|---|
@@ -717,7 +717,7 @@ Request matrix over HTTP, p50 (details, profile and method: [benchmarks/STRIX_HA
   144 decisions; the other two are one question that fp32 puts at 0.502 / 0.498.
 - **A second machine** ([@piotrkowski](https://github.com/piotrkowski)): basal-2.0 (4.5B) on a ROG Flow Z13 tablet
   (same GPU, 32 GB, ~50 W) gives the same answers and a close speed-up (1.05–1.70×), 1.4–1.7× slower in both engines
-  ([details](benchmarks/STRIX_HALO.md#a-second-machine-basal-20-on-a-rog-flow-z13)).
+  ([details](https://github.com/rkinas/basal/blob/main/docs/benchmarks/STRIX_HALO.md#a-second-machine-basal-20-on-a-rog-flow-z13)).
 
 ## Google TPU (experimental, community-maintained)
 
@@ -764,11 +764,46 @@ every shape: 268 s (basal-2.0) and 180 s (mini) on a v5e, cached for later start
 Not on TPU: evidence spans, `--media`, early exit and quantisation. The 44 examples are a small sample; agreement and
 speed on your own items: `basal-bench --modes eager-fp32 tpu --questions <file.jsonl>`.
 
+## DGX Spark (GB10): batch flags with basal-2.0
+
+Whole-batch throughput of the bf16 engine (not `fp8`): `basal-calibrate --mode fast-nocompile` at the default
+concurrency (32) on 800 English decisions (every 5th line of a 4,000-decision public panel), basal-2.0 (4.5B) with
+basal 2.5.2, PyTorch 2.11.0+cu130 unless noted. Time includes the model load; agreement is argmax agreement with the
+default run.
+
+| flags | time | vs default | agreement |
+|---|---:|---:|---|
+| default | 399 s | – | – (a repeat: 800/800) |
+| `--concurrency 64` | 399 s | 1.00× | 800/800 |
+| `--concurrency 128` | 378 s | 0.95× | 800/800 |
+| `--batches fine` | 477 s | 1.20× | 800/800 |
+| `--prefix-cache on` | 470 s | 1.18× | 799/800 |
+| `--mode fast` | 441 s | 1.11× | 799/800 (a repeat: the same) |
+| `--deterministic` (PyTorch 2.13) | 410 s | 1.03× | two runs bit-identical |
+| PyTorch 2.13.0+cu130 | 399 s | 1.00× | 800/800 |
+| PyTorch 2.13, `--batches compact` | 394 s | 0.99× | 798/800 |
+
+On the GB10 the fastest variant, `--concurrency 128`, saves about 5% of the time; `fine`, `--prefix-cache on` and
+`fast` (its compile time included) are slower: keep the defaults. Accuracy stayed within one decision of the default's
+(0.8137) in every row.
+
+- **`--batches compact` needs PyTorch 2.13** here: 2.11's `varlen_attn` has no `enable_gqa`, and the engine refuses
+  compact rows (`this torch's varlen_attn has no enable_gqa`). The format-1 cascade's second pass needs 2.13 as well
+  (`seqused_k`); with it, basal-1.5 (4.5B, format 1) took 471 s against 483 s on 2.11, 800/800 agreeing.
+- **basal-2.0-mini**: 136 s on 2.11, the same on 2.13 (answers identical); `--batches compact` 139 s.
+- **One request at a time** (`basal-bench`, 44 built-in decisions), 4.5B: `eager` 9.95 decisions/s (load 76 s),
+  `fast-nocompile` 8.70 (334 s), `fast` 9.09 (508 s); mini: 27.0, 27.0 and 28.4. Unchanged from basal 2.4.1 within
+  0.5%.
+- **PyTorch 2.11 and FlexAttention**: the Gemma 4 attention test at head dimension 512 (`tests/test_sdpa_stride.py`)
+  fails to compile on the GB10 (`No valid triton configs ... Required: 165888 Hardware limit: 101376` bytes of shared
+  memory); PyTorch 2.13 compiles it.
+
 ## Notes per platform
 
 - **DGX Spark (GB10, aarch64, CUDA 13).** In the README install steps use the CUDA 13 build of PyTorch
   (`uv pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130`) instead of cu128. The GPU shares LPDDR5X memory (about 273 GB/s) with the CPU; every forward pass reads
-  all weights, which is why FP8 (half the bytes) halves latency.
+  all weights, which is why FP8 (half the bytes) halves latency. With PyTorch 2.13 (cu130), `--batches compact`
+  and the format-1 cascade also run; batch flags measured: [DGX Spark (GB10): batch flags](#dgx-spark-gb10-batch-flags-with-basal-20).
 - **B300 / B200 (sm_100/sm_103).** PyTorch cu130 wheels work. The `vllm` mode needs a CUDA toolkit (nvcc) of version
   12.9 or newer on the machine: vLLM's FlashInfer kernels are compiled on first use, and nvcc 12.8 (found in some
   container images) cannot target the B300 (`Unsupported gpu architecture 'compute_103a'`). Compilation of `nvfp4` takes long (about 50 minutes on
@@ -784,4 +819,4 @@ speed on your own items: `basal-bench --modes eager-fp32 tpu --questions <file.j
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [HARDWARE.md](https://github.com/rkinas/basal/blob/main/docs/HARDWARE.md) (upstream [`rkinas/basal`], commit [`160508223f`](https://github.com/rkinas/basal/commit/160508223f386577188491d5c961179e154d5c91), fetched 2026-11-03T10:52:08Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/HARDWARE.md`](https://github.com/rkinas/basal/blob/main/docs/HARDWARE.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

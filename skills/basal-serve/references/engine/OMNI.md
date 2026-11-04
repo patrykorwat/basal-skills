@@ -1,13 +1,13 @@
 # basal-omni on the basal engine (Gemma 4)
 
 basal-omni-1.0 are experimental typed-decision models on Google Gemma 4: basal-omni-1.0-mini (4B, Gemma 4 E4B) and
-basal-omni-1.0-max (12B, Gemma 4 12B), with prompt format 2 ([FORMAT2.md](FORMAT2.md)): up to 255 options, one forward pass per
+basal-omni-1.0-max (12B, Gemma 4 12B), with prompt format 2 ([FORMAT2.md](https://github.com/rkinas/basal/blob/main/docs/FORMAT2.md)): up to 255 options, one forward pass per
 question. They are trained on text; with `--media on` the server also takes images and audio in a request (below).
 
 ## Serve
 
 ```bash
-uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"
+uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
 basal-serve --model Remek/basal-omni-1.0-max --mode eager --media on --port 8000    # or Remek/basal-omni-1.0-mini
 ```
 
@@ -86,7 +86,7 @@ basal-serve --model Remek/basal-omni-1.0-max --mode eager --media on --port 8000
 - **`fast` and `fast-nocompile` (basal 2.3, text):** the CUDA graph engine runs Gemma 4 through its own layer code
   (`basal/gemma4_graph.py`, transformers' modules and weights) under the engine's packing, graphs and caches:
   - **SOAM over sliding-window layers.** The packed row of a request and its two passes work as for every basal model
-    ([SOAM.md](SOAM.md)); in the sliding-window layers (window 512 on E4B, 1,024 on 12B and 31B) a branch token sees a
+    ([SOAM.md](https://github.com/rkinas/basal/blob/main/docs/SOAM.md)); in the sliding-window layers (window 512 on E4B, 1,024 on 12B and 31B) a branch token sees a
     key only within the window of its own position, as in its prompt alone, so the window is a condition on positions
     inside the trie mask.
   - **Keys and values per layer type** (head size 256 in sliding, 512 in global layers; 12B / 31B: one projection for
@@ -259,7 +259,7 @@ calibration test split:
 
 llama.cpp (b11312, the build in llama-cpp-python 0.3.36) and mlx-lm 0.32.2 implement Gemma 4's text decoder: sliding
 and global attention, per-layer inputs (E4B), KV sharing, the final logit softcap. Convert with llama.cpp's converter
-(the text decoder only; the image and audio towers are left out), as for basal-1.0 ([GGUF.md](GGUF.md#convert-yourself)):
+(the text decoder only; the image and audio towers are left out), as for basal-1.0 ([GGUF.md](https://github.com/rkinas/basal/blob/main/docs/GGUF.md#convert-yourself)):
 
 ```bash
 python llama.cpp/convert_hf_to_gguf.py basal-omni-1.0-mini --outtype q8_0 --outfile basal-omni-1.0-mini-Q8_0.gguf
@@ -373,4 +373,4 @@ within the bf16 readout's own deviation. On E4B the text answers with
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [OMNI.md](https://github.com/rkinas/basal/blob/main/docs/OMNI.md) (upstream [`rkinas/basal`], commit [`160508223f`](https://github.com/rkinas/basal/commit/160508223f386577188491d5c961179e154d5c91), fetched 2026-11-03T10:52:08Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/OMNI.md`](https://github.com/rkinas/basal/blob/main/docs/OMNI.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

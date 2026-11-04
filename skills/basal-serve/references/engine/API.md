@@ -42,7 +42,7 @@ URL (the official SDK was not tested). `POST /v1/basal` is the same endpoint; th
 ```
 
 2–255 options per question for prompt-format-2 models (basal-2.0), 2–10 for prompt-format-1 models (basal-1.0 to 1.5);
-`ollama` mode: at most 20 (see [FORMATS.md](FORMATS.md)). Several questions per request are answered over
+`ollama` mode: at most 20 (see [FORMATS.md](https://github.com/rkinas/basal/blob/main/docs/FORMATS.md)). Several questions per request are answered over
 one shared state (SOAM); asking them in one request is faster than separate requests and gives the same answers.
 
 ## Response
@@ -169,7 +169,7 @@ the labels with probability ≥ `threshold` (default 0.5), at most `max` and at 
 that the whole set is exactly right. With `"objective": "iou"`, `"f1"` or `"exact"` the engine instead returns the set
 with the highest expected IoU, F1 or exact-match probability under the label probabilities (`min` / `max` bound its
 size) and its `expected_score`. An `exclusive` label is selected only alone; a `fallback` label ("none of these") is
-selected only when no other label is. See [FEATURES.md](FEATURES.md#choosing-the-set-objective).
+selected only when no other label is. See [FEATURES.md](https://github.com/rkinas/basal/blob/main/docs/FEATURES.md#choosing-the-set-objective).
 
 **`act`**: `criteria` are the possible outcomes (`{"true": ..., "false": ...}` for a yes/no question, or named options),
 `costs` gives the cost of every action for every outcome (`{"approve": {"true": 0, "false": 1240}, "reject":
@@ -178,15 +178,15 @@ selected only when no other label is. See [FEATURES.md](FEATURES.md#choosing-the
 cost under the calibrated probabilities. With `"max_error"` it also refuses automatic actions below the confidence
 threshold certified for that error and question type (the response then names the `refused` action and says
 `"deferred": true`) and needs a `defer` / `human` action (or `"defer_action": "<name>"`). Without a threshold certified
-for the type and target, every automatic action is refused. See [FEATURES.md](FEATURES.md#act-cost-aware-actions).
+for the type and target, every automatic action is refused. See [FEATURES.md](https://github.com/rkinas/basal/blob/main/docs/FEATURES.md#act-cost-aware-actions).
 
 **`tool`** (*experimental*): `tools` takes OpenAI (Chat Completions or Responses), MCP (`inputSchema`) or Anthropic
 (`input_schema`) tool definitions. Each tool becomes an option `name(a, b, c?) — description`, where `?` marks an
 optional parameter; descriptions are cut at 300 characters (`"description_chars"`, 0 = no cap). The extra options
 (`answer_directly`, `ask_user`, `none`; by default all three) follow the tools. `"rank": k` returns the k most probable
 options. `"multi": true` returns the set of tools to call, using the `multi` objectives and constraints. `max_error`
-defers to a person, as in `act`. See [FEATURES.md](FEATURES.md#tool-which-tool-next), which also shows a
-[step of an agent loop](FEATURES.md#a-step-of-an-agent-loop) in one request.
+defers to a person, as in `act`. See [FEATURES.md](https://github.com/rkinas/basal/blob/main/docs/FEATURES.md#tool-which-tool-next), which also shows a
+[step of an agent loop](https://github.com/rkinas/basal/blob/main/docs/FEATURES.md#a-step-of-an-agent-loop) in one request.
 
 **Answer sets and abstain** (`choice`, `noul`, `score`). `"coverage": 0.9` adds `answer_set`: the keys whose
 calibrated probability reaches the type's threshold for that coverage level, the most probable first (and always in).
@@ -206,7 +206,7 @@ A key without a description (`"criteria": {"approve": null}` or a list of keys) 
 **Evidence** (*experimental*): `"evidence": true` on a question returns up to three spans of the state that support the
 answer, with character offsets and a probability. It needs a model that ships `evidence_head.pt` (basal-1.5); the
 basal-2.0 models do not ship one, and the server refuses evidence requests for them. See
-[FEATURES.md](FEATURES.md#evidence-spans).
+[FEATURES.md](https://github.com/rkinas/basal/blob/main/docs/FEATURES.md#evidence-spans).
 
 **Task types** (*experimental*, 2.1): `classify`, `verify`, `compress` and `extract` (a JSON schema) are accepted as
 question types next to the others in the same request. They are expanded into `choice` / `noul` / `multi` decisions over
@@ -216,7 +216,7 @@ the shared state and answered in the shapes described in [TASKS.md](TASKS.md).
 "candidates": {...} | [...]}` ranks thousands of candidates, more than the 255 options of a choice question: yes / no
 screening in shared-context requests of 50 candidates, then one choice question over the top 20. The answer is
 `{"type": "rank", "ranking": [{"key", "score", "choice"?}, ...], "top": "<key>", "candidates": n, "requests": n}`. See
-[NAVIGATE.md](NAVIGATE.md#rank-thousands-of-candidates), which also covers `basal-navigate`, retrieval by navigating a
+[NAVIGATE.md](https://github.com/rkinas/basal/blob/main/docs/NAVIGATE.md#rank-thousands-of-candidates), which also covers `basal-navigate`, retrieval by navigating a
 document tree with these questions.
 
 **Facts**: `"facts": "auto"` appends a block of computed facts to a Polish state: the weekday of every date and
@@ -278,10 +278,10 @@ basal-serve --model Remek/basal-2.0-4.5B --mode fast --template-prefix off --cal
 
 ## MCP
 
-Agents can call the same decisions over the Model Context Protocol: [MCP.md](MCP.md).
+Agents can call the same decisions over the Model Context Protocol: [MCP.md](https://github.com/rkinas/basal/blob/main/docs/MCP.md).
 
 ---
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [API.md](https://github.com/rkinas/basal/blob/main/docs/API.md) (upstream [`rkinas/basal`], commit [`160508223f`](https://github.com/rkinas/basal/commit/160508223f386577188491d5c961179e154d5c91), fetched 2026-11-03T10:52:08Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/API.md`](https://github.com/rkinas/basal/blob/main/docs/API.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

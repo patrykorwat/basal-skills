@@ -1,7 +1,7 @@
 # Install and run
 
 Every way to run basal, all behind the same `basal-serve` HTTP API. The short version is in the
-[README](../README.md#quick-start).
+[README](https://github.com/rkinas/basal/blob/main/README.md#quick-start).
 
 ## What the model repositories contain
 
@@ -66,7 +66,7 @@ missing):
 ```bash
 uv venv --python 3.12 --allow-existing ~/basal-env && source ~/basal-env/bin/activate
 uv pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
-uv pip install "basal[fp8] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"
+uv pip install "basal[fp8] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
 basal-serve --model Remek/basal-2.0-4.5B --mode fast --template-prefix off --port 8000
 ```
 
@@ -86,7 +86,7 @@ basal-serve --model Remek/basal-2.0-4.5B --mode fast --template-prefix off --por
   (`uv pip install flash_attn_3 --extra-index-url https://download.pytorch.org/whl/cu128`); compact batching and
   the template cache use it. On other GPUs, `--batches compact` runs them through torch's varlen attention (about
   6 GB more GPU memory for mini and 7 GB for the 4.5B where the card has room, 2.4 GB on a full 16 GB card;
-  [SERVING.md](SERVING.md#serving-modes)).
+  [SERVING.md](https://github.com/rkinas/basal/blob/main/docs/SERVING.md#serving-modes)).
 - Other models: `--model Remek/basal-2.0-max` or `--model Remek/basal-2.0-mini`.
 - **basal-omni-pico (Qwen3.5) needs flash-linear-attention** for its Gated DeltaNet layers in `--mode fast` (2.4+):
   `uv pip install "flash-linear-attention==0.5.2"`, then `basal-serve --model Remek/basal-omni-pico`. Without it,
@@ -178,28 +178,28 @@ ties, and accuracy moved by −0.8 to +1.4 points against them on a development 
 ```bash
 # vLLM brings its own torch: a separate environment. vLLM 0.31 brings torch built for CUDA 13.0: NVIDIA driver >= 580
 uv venv --python 3.12 --allow-existing ~/basal-vllm && source ~/basal-vllm/bin/activate
-uv pip install "basal[vllm] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"
+uv pip install "basal[vllm] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
 basal-serve --model Remek/basal-2.0-4.5B --mode vllm --port 8000          # --max-len 32768 for long documents
 
 # SGLang (own environment; its kernels need a CUDA 12.9+ toolkit; it also brings torch for CUDA 13.0: driver >= 580)
 uv venv --python 3.12 --allow-existing ~/basal-sglang && source ~/basal-sglang/bin/activate
 uv pip install --prerelease=allow "sglang[srt]==0.5.21"
-uv pip install --no-deps "basal @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"
+uv pip install --no-deps "basal @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
 uv pip install starlette uvicorn httpx accelerate safetensors   # if missing
 basal-serve --model Remek/basal-2.0-4.5B --mode sglang --port 8000
 ```
 
 The basal server, API and calibration stay the same; the backend reads the option codes' log-probabilities (vLLM up
-to 255 codes, see [FORMATS.md](FORMATS.md#engines-and-the-number-of-options)). A per-engine calibration file
+to 255 codes, see [FORMATS.md](https://github.com/rkinas/basal/blob/main/docs/FORMATS.md#engines-and-the-number-of-options)). A per-engine calibration file
 (`CALIBRATION.<mode>.json`) is used when a model ships one, else `CALIBRATION.json`. The basal-2.0 release numbers
 were measured with the basal engine, not with these backends; their agreement with the basal engine was measured on
-basal-1.5 ([QUANTIZATION.md](QUANTIZATION.md)).
+basal-1.5 ([QUANTIZATION.md](https://github.com/rkinas/basal/blob/main/docs/QUANTIZATION.md)).
 
 ### Apple Silicon (MLX)
 
 ```bash
 uv venv --python 3.12 --allow-existing ~/basal-mlx && source ~/basal-mlx/bin/activate
-uv pip install "basal[mlx] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"
+uv pip install "basal[mlx] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
 basal-serve --model Remek/basal-2.0-4.5B-MLX-8bit --mode mlx --port 8000
 ```
 
@@ -207,7 +207,7 @@ The request and response are the same as above. `-MLX-8bit` holds affine 8-bit d
 and the output head stay in bf16, because the decision is read from the output head. The state of a request is
 computed once into a KV cache shared by all its questions. With `basal[mlx]` installed, `mlx` is the default mode on a
 Mac; `--mode mlx` also loads a bf16 model directory, and `--mode mps` runs the PyTorch engine on the Mac's GPU
-instead ([HARDWARE.md](HARDWARE.md#apple-silicon)). How the ports work: [PORTS.md](PORTS.md).
+instead ([HARDWARE.md](HARDWARE.md#apple-silicon)). How the ports work: [PORTS.md](https://github.com/rkinas/basal/blob/main/docs/PORTS.md).
 
 ### Ollama and llama.cpp (GGUF)
 
@@ -216,7 +216,7 @@ log-probabilities of the option codes of one generated token. Ollama 0.12.11 or 
 
 ```bash
 uv venv --python 3.12 --allow-existing ~/basal-env && source ~/basal-env/bin/activate
-uv pip install "basal @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"   # also installs the hf CLI
+uv pip install "basal @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"   # also installs the hf CLI
 hf download Remek/basal-2.0-4.5B-GGUF --local-dir basal-2.0-4.5B-GGUF
 cd basal-2.0-4.5B-GGUF && ollama create basal-2.0-4.5b:q8_0 -f Modelfile.Q8_0 && cd ..
 basal-serve --model ./basal-2.0-4.5B-GGUF --mode ollama --ollama-model basal-2.0-4.5b:q8_0 --port 8000
@@ -232,10 +232,10 @@ basal-serve --model ./basal-2.0-4.5B-GGUF --mode llamacpp --llamacpp-url http://
 ```
 
 Without a separate server, `--mode gguf` loads the file in process through llama-cpp-python (Metal, CUDA or CPU; for
-CUDA build it first, see [GGUF.md](GGUF.md)):
+CUDA build it first, see [GGUF.md](https://github.com/rkinas/basal/blob/main/docs/GGUF.md)):
 
 ```bash
-uv pip install "basal[gguf] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"
+uv pip install "basal[gguf] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
 basal-serve --model ./basal-2.0-4.5B-GGUF --mode gguf --gguf basal-2.0-4.5B-GGUF/basal-2.0-4.5B-Q8_0.gguf --port 8000
 ```
 
@@ -248,8 +248,8 @@ overrides the Modelfile) and llama.cpp mode reads `llama-server -c`; longer stat
 Quantisations: `Q8_0` (recommended) and `Q5_K_M` (smaller). Requests of one state are sent one after another, so the
 prompt cache of Ollama / llama.cpp computes the state once; `--http-parallel N` (with `OLLAMA_NUM_PARALLEL` /
 `llama-server -np`) serves concurrent clients. GGUF is the slow path for batches: it is for desktops and laptops, not
-servers. Details: [PORTS.md](PORTS.md), [GGUF.md](GGUF.md). Other GGUF files with the same tokenizer fix (other
-quantisations, basal-1.0): `basal-export-gguf` ([GGUF.md](GGUF.md#convert-yourself)).
+servers. Details: [PORTS.md](https://github.com/rkinas/basal/blob/main/docs/PORTS.md), [GGUF.md](https://github.com/rkinas/basal/blob/main/docs/GGUF.md). Other GGUF files with the same tokenizer fix (other
+quantisations, basal-1.0): `basal-export-gguf` ([GGUF.md](https://github.com/rkinas/basal/blob/main/docs/GGUF.md#convert-yourself)).
 
 ### LM Studio (GGUF as a decision model)
 
@@ -268,7 +268,7 @@ with no `basal-serve` in front. Requirements:
   runs it with Metal), or use the `-MLX-8bit` ports with `basal-serve --mode mlx`.
 
 ```bash
-uv pip install "basal[gguf-export] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"
+uv pip install "basal[gguf-export] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
 hf download Remek/basal-2.0-4.5B-GGUF --local-dir basal-2.0-4.5B-GGUF
 basal-export-gguf ./basal-2.0-4.5B-GGUF lmstudio/basal-2.0-4.5B-Q8_0.gguf \
     --gguf basal-2.0-4.5B-GGUF/basal-2.0-4.5B-Q8_0.gguf --systemone
@@ -307,7 +307,7 @@ curl http://127.0.0.1:1234/v1/systemone -H "Content-Type: application/json" -d '
 
 For your own calibration, fit it with `basal-calibrate` on the same file (`--model ./basal-2.0-4.5B-GGUF --mode gguf
 --gguf <file>`) and write it into a new copy with `--systemone --calibration CALIBRATION.custom.json`. Details of the
-metadata: [GGUF.md](GGUF.md#decision-metadata-for-lm-studio-and-llama-server---systemone).
+metadata: [GGUF.md](https://github.com/rkinas/basal/blob/main/docs/GGUF.md#decision-metadata-for-lm-studio-and-llama-server---systemone).
 
 ### Google TPU (experimental, community-maintained)
 
@@ -319,7 +319,7 @@ use transformers), then the `tpu` extra (JAX and libtpu from PyPI; Python 3.12 o
 ```bash
 uv venv --python 3.12 --allow-existing ~/basal-tpu && source ~/basal-tpu/bin/activate
 uv pip install "torch>=2.11" --index-url https://download.pytorch.org/whl/cpu
-uv pip install "basal[tpu] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"   # 2.2.0: the first release with --mode tpu
+uv pip install "basal[tpu] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"   # 2.2.0: the first release with --mode tpu
 basal-serve --model Remek/basal-2.0-4.5B --port 8000   # --mode tpu is the default on a TPU VM
 ```
 
@@ -349,7 +349,7 @@ Install the `media` extra (pillow, soundfile, scipy, torchvision) and serve a ba
 ```bash
 uv venv --python 3.12 --allow-existing ~/basal-env && source ~/basal-env/bin/activate
 uv pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
-uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.1.tar.gz"
+uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
 basal-serve --model Remek/basal-omni-1.0-mini --mode eager --media on --port 8000   # or Remek/basal-omni-1.0-max
 ```
 
@@ -377,4 +377,4 @@ curl -s localhost:8000/v1/systemone -H 'content-type: application/json' -d '{
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [INSTALL.md](https://github.com/rkinas/basal/blob/main/docs/INSTALL.md) (upstream [`rkinas/basal`], commit [`160508223f`](https://github.com/rkinas/basal/commit/160508223f386577188491d5c961179e154d5c91), fetched 2026-11-03T10:52:08Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/INSTALL.md`](https://github.com/rkinas/basal/blob/main/docs/INSTALL.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
