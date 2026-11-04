@@ -5,6 +5,36 @@ repo: `VERSION` is the single source; the Hermes plugin (`plugin.yaml`) always
 mirrors it, and no artifact carries a version of its own. See `AGENTS.md` for
 the workflow.
 
+## [1.6.0] — 2026-11-04
+
+### Added
+
+- Engine docs mirror refreshed to `rkinas/basal` `160508223f` (2026-11-03), so
+  the bundled references describe what a current `basal-serve` actually answers:
+
+  - `API.md` — OpenAI's Decisions API (`POST /v1/decisions`, usable straight
+    from the OpenAI Python SDK), the vLLM structured-diffusion request shape
+    (`ask_if`, `depends_on`, `images`), a `code` field on every error body
+    (`INVALID_REQUEST` / `OUT_OF_MEMORY` / `INTERNAL_ERROR`) plus the
+    `--error-format openai` shape, and `certified` / `context` in
+    `GET /v1/models`.
+  - Answer sets: `coverage` (conformal `answer_set`) and `max_error`
+    (`abstain`) for `choice` / `noul` / `score` questions, with the
+    `basal-calibrate --conformal` fitting behind them (`CALIBRATION.md`).
+  - The experimental `rank` question type, and task names no longer allowed to
+    contain `::` (HTTP 422).
+  - Install/hardware: LM Studio serving `/v1/systemone` itself (the `-GGUF`
+    files as decision models, LM Studio 0.4.26+), MLX forward-pass trimming
+    and state cache on Apple Silicon, compact rows with flex kernels on
+    Blackwell.
+
+### Changed
+
+- Nothing in this repo's own code or skill rules changed; the bump records that
+  the engine contract the skills point at moved (new endpoints, request fields
+  and answer fields). Per `AGENTS.md` the mirror is tracked by its own
+  `MANIFEST.json` and would not require a bump on its own.
+
 ## [1.5.0] — 2026-10-27
 
 ### Added
