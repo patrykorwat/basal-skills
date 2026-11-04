@@ -27,8 +27,8 @@ how to get a change *in*.
 1. Branch from `main`: `feat/<summary>`, `fix/<summary>`, `docs/<summary>`.
 2. Make the change and bump versions per `AGENTS.md`:
    skill content → that skill's frontmatter version; shipped code →
-   `VERSION` + `plugin.yaml` together; either way → a CHANGELOG entry
-   under `[Unreleased]`.
+   `VERSION` + `plugin.yaml` together; either way → a dated CHANGELOG
+   section (never `[Unreleased]`).
 3. Add or adjust a test when behaviour changes (`pytest` must pass; it
    enforces structure, version consistency and hygiene).
 4. A new "tested" claim needs its dated row in `tested-results.md`.

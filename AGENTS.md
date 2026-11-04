@@ -40,8 +40,9 @@ shapes), MINOR adds usable capability, PATCH fixes wording/bugs.
 ## Change workflow (checklist)
 
 1. Make the change.
-2. Bump `VERSION` (+ `plugin.yaml` mirror) if authored content changed.
-   Docs-only: no bump, add a CHANGELOG entry under `[Unreleased]`.
+2. Bump `VERSION` (+ `plugin.yaml` mirror) if authored content changed;
+   docs/infra-only changes take a PATCH bump. Every change gets a dated
+   CHANGELOG section — never an `[Unreleased]` one.
 3. Add/adjust CHANGELOG entry describing the change.
 4. Run `pytest` locally — it must pass (it also checks version consistency
    and that no machine path or secret entered shipped files).
