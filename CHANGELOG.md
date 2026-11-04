@@ -5,6 +5,28 @@ repo: `VERSION` is the single source; the Hermes plugin (`plugin.yaml`) always
 mirrors it, and no artifact carries a version of its own. See `AGENTS.md` for
 the workflow.
 
+## [1.6.1] — 2026-11-04
+
+### Fixed
+
+- `.github/workflows/sync-docs.yml`: the daily mirror PR step failed on every
+  run that had anything to publish. `git push --force-with-lease` had no
+  remote-tracking value to compare against (`actions/checkout` fetches only
+  `main`), so it died with "stale info", and every `gh` call exited 4 because
+  the job never set `GH_TOKEN` — run 11 got past the push and then failed on
+  `gh`, run 12 died at the push. The step now reads the branch's value from
+  the remote before leasing it, resolves the open PR's number (the old
+  `gh pr edit docs/engine-mirror` passed a branch where gh wants a number),
+  and takes `GH_TOKEN` from the job.
+- `tests/test_sync_docs_step.py` replays that step body against a throwaway
+  remote — branch absent, branch left over by an earlier run, and an open PR —
+  so CI catches the regression instead of the next cron.
+
+### Changed
+
+- `AGENTS.md` / `CONTRIBUTING.md`: docs- and infra-only changes take a PATCH
+  bump and get a dated CHANGELOG section; `[Unreleased]` is off the table.
+
 ## [1.6.0] — 2026-11-04
 
 ### Added
@@ -157,7 +179,7 @@ First versioned release; before this date the history is:
 ## Versioning rules (summary, full text in AGENTS.md)
 - Every change to shipped artifacts (skill content, plugin code, tools,
   MCP bridge) bumps the affected component's version.
-- Docs-only changes (README, AGENTS, CHANGELOG) need no bump but do get a
-  CHANGELOG entry under "Unreleased".
+- Docs-only changes (README, AGENTS, CHANGELOG) get a dated CHANGELOG section
+  as well, so they take a PATCH bump. Never an `[Unreleased]` section.
 - A release = `VERSION` + `plugin.yaml` aligned, CHANGELOG dated, git tag
   `vX.Y.Z` pushed.
