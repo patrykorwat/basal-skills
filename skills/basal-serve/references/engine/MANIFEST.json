@@ -1,13 +1,23 @@
 {
-  "source": "https://github.com/rkinas/basal/tree/main/docs",
-  "commit": "160508223f386577188491d5c961179e154d5c91",
-  "fetched_utc": "2026-11-03T10:52:08Z",
+  "source": "https://github.com/rkinas/basal/tree/main",
+  "sources": {
+    "API.md": "docs/API.md",
+    "TASKS.md": "docs/TASKS.md",
+    "OMNI.md": "docs/OMNI.md",
+    "CALIBRATION.md": "docs/CALIBRATION.md",
+    "INSTALL.md": "docs/INSTALL.md",
+    "HARDWARE.md": "docs/HARDWARE.md",
+    "UPSTREAM-SKILL.md": "skills/basal/SKILL.md"
+  },
+  "commit": "8e80d3eba0fd0bff8195e39c928ceac9194c8b82",
+  "fetched_utc": "2026-11-04T12:18:39Z",
   "files": [
     "API.md",
-    "TASKS.md",
-    "OMNI.md",
     "CALIBRATION.md",
+    "HARDWARE.md",
     "INSTALL.md",
-    "HARDWARE.md"
+    "OMNI.md",
+    "TASKS.md",
+    "UPSTREAM-SKILL.md"
   ]
 }

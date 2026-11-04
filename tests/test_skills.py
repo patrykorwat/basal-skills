@@ -112,6 +112,19 @@ def test_engine_mirror_has_no_secrets():
         assert not m, f"{path.relative_to(ROOT)} contains what looks like a secret: {m.group(0)!r}"
 
 
+def test_engine_mirror_links_are_reachable():
+    """A mirrored page must not link to a file we do not ship. sync_docs.py
+    rewrites those links to their upstream URL; a bare relative link here
+    means the mirror was copied without the rewrite."""
+    mirror = ROOT / "skills" / "basal-serve" / "references" / "engine"
+    shipped = {p.name for p in mirror.glob("*.md")}
+    for path in mirror.glob("*.md"):
+        for m in re.finditer(r"\]\((?!https?://)([^)#\s]+\.md)", path.read_text(encoding="utf-8")):
+            assert Path(m.group(1)).name in shipped, (
+                f"{path.relative_to(ROOT)} links to {m.group(1)!r}, which the mirror "
+                "does not ship — sync_docs.py should have made it an upstream URL")
+
+
 def test_plugin_manifest_and_registration_agree():
     manifest = (ROOT / "plugin.yaml").read_text(encoding="utf-8")
     declared = set(re.findall(r"^\s+- (basal_\w+)$", manifest, re.M))
