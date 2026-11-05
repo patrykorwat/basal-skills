@@ -7,7 +7,7 @@ question. They are trained on text; with `--media on` the server also takes imag
 ## Serve
 
 ```bash
-uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.3.tar.gz"
+uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"
 basal-serve --model Remek/basal-omni-1.0-max --mode eager --media on --port 8000    # or Remek/basal-omni-1.0-mini
 ```
 
@@ -373,4 +373,4 @@ within the bf16 readout's own deviation. On E4B the text answers with
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [`docs/OMNI.md`](https://github.com/rkinas/basal/blob/main/docs/OMNI.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/OMNI.md`](https://github.com/rkinas/basal/blob/main/docs/OMNI.md) (upstream [`rkinas/basal`], commit [`3f66d32f2f`](https://github.com/rkinas/basal/commit/3f66d32f2fd66a7cc7130ccb7bfbcb2b103f2615), fetched 2026-11-05T17:19:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

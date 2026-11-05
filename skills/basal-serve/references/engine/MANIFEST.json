@@ -9,8 +9,8 @@
     "HARDWARE.md": "docs/HARDWARE.md",
     "UPSTREAM-SKILL.md": "skills/basal/SKILL.md"
   },
-  "commit": "8e80d3eba0fd0bff8195e39c928ceac9194c8b82",
-  "fetched_utc": "2026-11-04T12:18:39Z",
+  "commit": "3f66d32f2fd66a7cc7130ccb7bfbcb2b103f2615",
+  "fetched_utc": "2026-11-05T17:19:55Z",
   "files": [
     "API.md",
     "CALIBRATION.md",

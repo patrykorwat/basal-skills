@@ -69,12 +69,16 @@ One `/v1/systemone` request per line; every question carries its correct answer 
 |---|---|
 | `gold` (choice) | an option key, or its description |
 | `gold` (noul) | `"yes"` / `"no"` (or `true` / `false`) |
-| `gold` (score) | the level index (0 = first level), its key, or its text |
+| `gold` (score) | the level index (0 = first level), its key, or its text; an integer is always the index, and is refused when a numeric key names another level (`{"1": ..., "2": ..., "3": ...}` with `"gold": 2`: give `"2"`) |
 | `gold` (act) | an outcome, as for choice (`"yes"` / `"no"` for `true` / `false` outcomes); `act` counts as its base type |
 | `gold` (multi) | the list of labels that apply: keys or descriptions, with `[]` for none (see [below](#multi-the-fallback-threshold-of-a-label-set)) |
-| `group` | optional, on the line or on a question: decisions of one group (twins, duplicates, one customer) stay on the same side of the split; default: one group per line, since the questions of a request share its state |
+| `group` | optional, on the line or on a question: decisions of one group (twins, duplicates, one customer) stay on the same side of the split; default: one group per line, since the questions of a request share its state (`null` counts as not given, as for `id`). The bound of a threshold counts every decision as independent: when a type or task has more FIT decisions than groups (the claims of one document, the fields of one form), errors shared within a group make it optimistic, and the report warns with the decisions per group |
 | `family` | optional, on the line or on a question: the task family of the leave-one-family-out ECE (one kind of decision: a routing question, a document check); default: the question name |
 | `id` | optional, used in messages |
+
+A question's `ask_if` / `depends_on` is dropped: every labelled question is asked, whatever the answers of the others.
+Rows whose probabilities are not finite numbers in [0, 1], or whose gold is not an option, are left out of the fit
+and reported (also from `--from-rows` files).
 
 Task questions (`classify`, `verify`, `extract`, see [TASKS.md](TASKS.md)) carry `"gold"` too, and certify the
 `automated` flag of their answers ([below](#tasks-classify-verify-extract)):
@@ -103,15 +107,32 @@ The shipped files were fitted with the same steps:
    For prompt-format-2 models (see [FORMATS.md](https://github.com/rkinas/basal/blob/main/docs/FORMATS.md)) `choice` also gets a temperature per option-count bucket
    (2–10, 11–26, 27–255 options), fitted the same way where FIT has at least `--min-per-type` decisions in the bucket;
    a bucket with fewer keeps the shipped bucket temperature, else the type temperature applies to it.
-3. For each target error *r*, the threshold is the lowest confidence whose accepted FIT decisions have a one-sided 95%
-   Clopper–Pearson upper bound ≤ *r*, scanned from the most confident decision down (at least 50 accepted; equal
-   confidences are accepted or refused together). The candidates are the observed confidences, never a fixed grid.
+3. For each target error *r*, the threshold comes from a **fixed-sequence test** on FIT. The candidates are the
+   observed confidences, never a fixed grid; equal confidences are accepted or refused together. They are tested from
+   the most confident down, each with the one-sided 95% Clopper–Pearson upper bound of the decisions it accepts
+   ≤ *r*, and the test stops at the first level that fails: the threshold is the last level that passed. The first
+   level tested is set by the counts alone, before any outcome is read: the most confident level that accepts enough
+   decisions to meet the bound with one error (93 at 5%, 473 at 1%) when the type has at least twice that many FIT
+   decisions, else enough to meet it without an error (59 at 5%, 299 at 1%; at least 50). If it fails, the type has no
+   threshold at that target, even when a lower level would pass on its own: scanning on past a failure until some level passes
+   tests many times and certifies a type whose error is just above the target far more often than 5% of the time
+   (about 20% with 1,000 decisions at 5.1% error and a 5% target); stopping at the first failure keeps it at most 5%.
+   The cost is that errors among the very top decisions end the test there (one is allowed at the start when the
+   type has enough decisions); label more data, or check the CERT report, when a type you expected to certify does
+   not (the reason names the first level and its errors).
+   Each certificate is one test of one question type at one target error: its 95% holds for that type and target,
+   which is what a request's `max_error` on a question of that type relies on. It is not a joint statement over all
+   types and targets at once (with three types and two targets, the chance that at least one of the six is wrong can
+   be up to six times 5%).
    A looser target never keeps a stricter threshold than a tighter one: a confidence certified at 1% is certified at
-   5% too, so where the 5% scan stops above the 1% threshold (it can pass early on a few very confident decisions
-   and stop on an error just below them), the 5% threshold is the 1% one, marked `floored_from`.
-   - It is certified per question type (`thresholds[r].per_type`). A temperature preserves the order of a type's
-     yes/no confidences (and, up to ties, its other confidences), so a type's certified coverage does not depend on
-     its temperature.
+   5% too, so where the 5% test stops above the 1% threshold (it starts on fewer, very confident decisions and can
+   stop on an error just below them), the 5% threshold is the 1% one, marked `floored_from`.
+   - It is certified per question type (`thresholds[r].per_type`), on the confidences as served. A temperature keeps
+     the order of a type's yes/no confidences, but not of its choice and score confidences: with three or more
+     options it can swap two decisions (logits [0, −3, −3] and [0, −2, −20]: 0.909 above 0.881 at T = 1, 0.403
+     below 0.512 at T = 10), and the option-count buckets of format 2 have their own temperatures. The temperatures
+     are fitted on the same FIT decisions, so for choice and score the order of the levels, and therefore the
+     certified coverage, can depend on them.
    - One threshold pooled over all types (`thresholds[r].confidence`, as in earlier files) is still written, marked
      `"pooled": "informational: ..."`, and never applied. It moves with the temperatures (a yes/no temperature of 1.7
      pushes yes/no confidences below the choice ones, and the pooled threshold then refuses yes/no decisions that are
@@ -254,26 +275,33 @@ The probabilities, and so the temperatures and thresholds, belong to one model. 
 to `basal-calibrate`, except that a Hugging Face cache snapshot path is recorded as its repository ID in
 `fitted_on.model` and its commit in `fitted_on.revision`. A repository ID likewise records its resolved commit;
 plain local directories keep their path without a revision. `basal-serve --calibration FILE` compares
-them with the served model: on another model, or another revision, it warns at start-up and reports
-`"calibration_warning"` in `GET /v1/models`; with `--strict-calibration` it refuses to start. A local copy of a model
-matches its Hugging Face name by the last part of the path (`/data/basal-omni-1.0-max` = `Remek/basal-omni-1.0-max`).
+them with the served model: on another model, or another revision, it warns at start-up, reports
+`"calibration_warning"` in `GET /v1/models` and keeps the file for its temperatures only, as a file of other option
+orders: its thresholds, task thresholds, conformal levels and fitted fallback thresholds are not applied (`max_error`
+defers, tasks report `automated: null`, answer sets hold every option) and every answer is marked
+`"calibration": "unvalidated"`; with `--strict-calibration` it refuses to start. When both are Hugging Face snapshots
+(a revision on each side) the whole repository ID is compared, so `OrgA/basal-x` is not `OrgB/basal-x`; a local copy
+of a model matches its Hugging Face name by the last part of the path (`/data/basal-omni-1.0-max` =
+`Remek/basal-omni-1.0-max`).
 The files that ship in a model's directory are not checked.
 
 With `--adapter`, `basal-calibrate` records the adapter as `fitted_on.adapter` (`<name>@<sha256 of its
 adapter_config.json and weights>[:12]`, so a rescaled adapter is another one)
 and basal-serve compares it like the model: a file fitted with another adapter, or with one when none is served (or
-the reverse), warns or, with `--strict-calibration`, refuses. Without `--calibration`, a `CALIBRATION[.<engine>].json`
+the reverse), is kept for its temperatures only in the same way or, with `--strict-calibration`, refused. Without `--calibration`, a `CALIBRATION[.<engine>].json`
 in the adapter directory is loaded first (and checked); the model's own file is the base model's, so it is loaded for
 its temperatures only, without thresholds, and the answers are marked `"calibration": "unvalidated"`.
 
 ## How many items
 
 For the **temperatures**, a few dozen labelled decisions of a type already help (`--min-blend`, above); 50 FIT
-decisions, about 72 labelled ones, fit it fully. For the **thresholds**, a few hundred labelled decisions usually certify the 5% target. The 1% target needs at least 299 accepted FIT
-decisions without an error (473 with one error, 628 with two), so in practice about 1,000 labelled decisions of a
-type or more. The thresholds are certified per question type, so these numbers hold for each type on its own: 299
-accepted `noul` decisions without an error, and again 299 `choice` decisions, not 299 in total. An error made with
-very high confidence is accepted at every threshold below it and raises the count for its type. On one external set
+decisions, about 72 labelled ones, fit it fully. For the **thresholds**, a few hundred labelled decisions usually certify the 5% target. The 1% target needs the 299 most confident FIT
+decisions of a type without an error (the first level the fixed-sequence test checks; with at least 946 FIT decisions
+of the type it checks the top 473 and allows one error there; further down, 628 accepted with two errors pass too), so
+in practice about 1,000 labelled decisions of a type or more. The thresholds
+are certified per question type, so these numbers hold for each type on its own: 299 accepted `noul` decisions without
+an error, and again 299 `choice` decisions, not 299 in total. An error made with very high confidence, among the
+first level tested, leaves its type without a threshold at that target. On one external set
 of 1,254 Polish business decisions (FIT: 462 `noul`, 371 `choice`) no type of five basal-2.0 and basal-omni models
 was certified at 1%: the lowest bound of any type was 1.2%, and for the basal-omni models a few errors at confidence
 0.997–0.999 set that floor. With fewer, use the refitted temperatures and the 5% threshold, or route uncertain cases
@@ -342,4 +370,4 @@ count (2–255) the `choice` row marks its type temperature `(not served: bucket
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [`docs/CALIBRATION.md`](https://github.com/rkinas/basal/blob/main/docs/CALIBRATION.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/CALIBRATION.md`](https://github.com/rkinas/basal/blob/main/docs/CALIBRATION.md) (upstream [`rkinas/basal`], commit [`3f66d32f2f`](https://github.com/rkinas/basal/commit/3f66d32f2fd66a7cc7130ccb7bfbcb2b103f2615), fetched 2026-11-05T17:19:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
