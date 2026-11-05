@@ -29,9 +29,14 @@ jobs:
           rc=$?
           echo "rc=$rc" >> "$GITHUB_OUTPUT"
           if [ "$rc" -eq 10 ]; then echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+          if [ "$rc" -ne 0 ] && [ "$rc" -ne 10 ]; then
+            echo "::warning::sync_docs.py failed (rc=$rc); the mirror stays at its last commit"
+          fi
           exit 0
+      # Runs on every scheduled run, not only when this run found changes: a
+      # previous run may have pushed the branch and died before opening the PR,
+      # and then "changed" would be false forever.
       - name: Open or update PR
-        if: steps.sync.outputs.changed == 'true'
         run: |
           set -euo pipefail
           BRANCH=docs/engine-mirror
@@ -39,26 +44,49 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
           git add skills/basal-serve/references/engine
-          if git diff --cached --quiet; then
-            echo "nothing staged although sync reported a change; skipping"
-            exit 0
-          fi
           SHA=$(python3 -c "import json;print(json.load(open('skills/basal-serve/references/engine/MANIFEST.json'))['commit'][:10])")
-          git commit -m "chore: mirror rkinas/basal docs ($SHA)"
+          PUSH=1
+          if git diff --cached --quiet; then
+            # Nothing new today, but an earlier run may have pushed a branch that
+            # never got its PR. Adopt that branch instead of resetting it to main,
+            # which would silently throw the pending mirror away.
+            if ! git ls-remote --exit-code --refs origin "refs/heads/$BRANCH" >/dev/null 2>&1; then
+              echo "nothing to publish"
+              exit 0
+            fi
+            echo "no upstream changes this run; keeping the pending mirror branch"
+            git fetch -q origin "$BRANCH"
+            git reset -q --hard FETCH_HEAD
+            PUSH=0
+          else
+            git commit -m "chore: mirror rkinas/basal docs ($SHA)"
+          fi
           # checkout fetched only main, so this branch has no remote-tracking ref
           # and --force-with-lease cannot guess its value ("stale info"). Read it.
+          HEAD_SHA=$(git rev-parse HEAD)
           REMOTE=$(git ls-remote --refs origin "refs/heads/$BRANCH" | cut -f1 || true)
-          if [ -n "$REMOTE" ]; then
-            git push --force-with-lease="$BRANCH:$REMOTE" origin "$BRANCH"
-          else
-            git push origin "$BRANCH"
+          if [ "$PUSH" = "1" ]; then
+            if [ -z "$REMOTE" ]; then
+              git push origin "$BRANCH"
+            elif [ "$REMOTE" != "$HEAD_SHA" ]; then
+              git push --force-with-lease="$BRANCH:$REMOTE" origin "$BRANCH"
+            else
+              echo "remote branch already at $HEAD_SHA"
+            fi
+          fi
+          if git diff --quiet "origin/main...$BRANCH"; then
+            echo "mirror matches main; nothing to review"
+            exit 0
           fi
           BODY="Daily docs sync found changes in \`rkinas/basal\` docs (\`$SHA\`). Review the diff, then merge; CI enforces the mirror hygiene tests."
           OPEN=$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open \
             --json number -q '.[0].number' || true)
           if [ -z "${OPEN:-}" ]; then
-            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
-              --title "chore: engine docs mirror update" --body "$BODY"
+            if ! gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" \
+                 --title "chore: engine docs mirror update" --body "$BODY" 2>/tmp/pr.err; then
+              echo "::error::cannot open the mirror PR: $(tr -d '\n' </tmp/pr.err) — if it says GitHub Actions is not permitted to create pull requests, enable Settings -> Actions -> General -> Workflow permissions -> 'Allow GitHub Actions to create and approve pull requests'. The branch is pushed either way."
+              exit 1
+            fi
           else
             gh pr edit "$OPEN" --repo "$GITHUB_REPOSITORY" --body "$BODY"
           fi

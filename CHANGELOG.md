@@ -5,6 +5,30 @@ repo: `VERSION` is the single source; the Hermes plugin (`plugin.yaml`) always
 mirrors it, and no artifact carries a version of its own. See `AGENTS.md` for
 the workflow.
 
+## [1.7.1] — 2026-11-05
+
+### Fixed
+
+- `sync-docs.yml` could push the mirror but not open its PR: run 13 died at
+  `gh pr create` with `GitHub Actions is not permitted to create or approve
+  pull requests`. That is a repository setting (Settings → Actions → General →
+  Workflow permissions), not a code bug, so the step now names it in the error
+  instead of surfacing a bare GraphQL message.
+- The PR step ran only when the sync reported changes. A run that pushed the
+  branch and then failed left the mirror sitting on `docs/engine-mirror`
+  forever: the next day reports "up to date", the step is skipped, and nothing
+  ever opens the review. It now runs every time — and when there is nothing
+  new it adopts the pending branch instead of resetting it to `main`, which
+  would have deleted an unreviewed mirror update.
+- `sync_docs.py` failures exit 0 by design; they are now surfaced as a workflow
+  warning instead of being silent.
+
+### Tests
+
+- `tests/test_sync_docs_step.py` gained the quiet-run cases: a pending branch
+  survives and gets its PR, and a quiet run with nothing pending touches
+  nothing. (They caught a dropped `git commit` in the rewritten step.)
+
 ## [1.7.0] — 2026-11-04
 
 ### Added

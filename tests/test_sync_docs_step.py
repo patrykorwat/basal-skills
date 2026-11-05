@@ -76,7 +76,7 @@ def clone(sandbox: Path, *, stale_branch: bool) -> Path:
     return work
 
 
-def run_step(sandbox: Path, work: Path, open_pr=None) -> subprocess.CompletedProcess:
+def run_step(sandbox: Path, work: Path, open_pr=None, *, changes: bool = True) -> subprocess.CompletedProcess:
     env = {**os.environ, "PATH": f"{sandbox / 'bin'}:{os.environ['PATH']}",
            "GITHUB_REPOSITORY": "patrykorwat/basal-skills",
            "GITHUB_OUTPUT": str(sandbox / "out.txt"),
@@ -86,9 +86,10 @@ def run_step(sandbox: Path, work: Path, open_pr=None) -> subprocess.CompletedPro
     if open_pr:
         env["FAKE_OPEN_PR"] = str(open_pr)
     (sandbox / "gh.log").write_text("")
-    eng = work / "skills" / "basal-serve" / "references" / "engine"
-    eng.joinpath("API.md").write_text("NEW docs from upstream\n")
-    eng.joinpath("MANIFEST.json").write_text('{"commit": "' + "b" * 40 + '"}\n')
+    if changes:  # what scripts/sync_docs.py leaves behind when upstream moved
+        eng = work / "skills" / "basal-serve" / "references" / "engine"
+        eng.joinpath("API.md").write_text("NEW docs from upstream\n")
+        eng.joinpath("MANIFEST.json").write_text('{"commit": "' + "b" * 40 + '"}\n')
     return subprocess.run(["bash", "-c", step_body()], cwd=work, env=env,
                           capture_output=True, text=True)
 
@@ -132,6 +133,27 @@ def test_open_pr_is_updated_not_duplicated(sandbox):
     assert r.returncode == 0, r.stdout + r.stderr
     calls = gh_calls(sandbox)
     assert "pr edit 7" in calls and "pr create" not in calls
+
+
+def test_pending_branch_survives_a_quiet_run(sandbox):
+    """The bug the "only when changed" gate created: a run that pushed the
+    branch and died before opening the PR leaves it there, and the next quiet
+    run used to reset the branch to main — deleting the pending mirror."""
+    work = clone(sandbox, stale_branch=True)
+    before = remote_sha(work)
+    r = run_step(sandbox, work, changes=False)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert remote_sha(work) == before, "the pending mirror branch was overwritten"
+    calls = gh_calls(sandbox)
+    assert "pr create" in calls, calls
+
+
+def test_quiet_run_with_nothing_pending_does_nothing(sandbox):
+    work = clone(sandbox, stale_branch=False)
+    r = run_step(sandbox, work, changes=False)
+    assert r.returncode == 0, r.stdout + r.stderr
+    assert gh_calls(sandbox).strip() == ""
+    assert remote_sha(work) is None
 
 
 def test_gh_is_given_a_token():
