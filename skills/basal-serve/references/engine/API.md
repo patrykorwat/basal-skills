@@ -82,11 +82,26 @@ one shared state (SOAM); asking them in one request is faster than separate requ
 - Errors return `{"error": "..."}` with a status code (2.3.1; before, every error was 422):
   - **422**: the request is invalid and must be changed (a body that is not a JSON object, a missing `state` or
     `questions`, a wrong field value, too many options, a prompt longer than the context, a field not available in
-    the server's mode or model);
+    the server's mode or model, more branches than `--max-branches`, 4,096 by default, task questions counted as
+    the questions they expand to, prompts holding more than `--max-prompt-mb` of text, 512 MiB by default, counted
+    before they are rendered; objects and arrays nested more than 256 levels, a string with a lone surrogate
+    such as `"\udead"`, a NaN or an infinity among the questions' numbers). Every check that needs no engine work
+    runs before any of it (the facts, media decoding, rendering, the queue); the context is checked once the prompts
+    are tokenized, before the engine runs;
+  - **413**: the body is larger than `--max-body-mb` (256 MiB by default; the largest media request, 8 items of 20 MB,
+    is about 214 MB in base64), refused before it is read whole (`code` `PAYLOAD_TOO_LARGE`);
   - **503**: the GPU ran out of memory (CUDA, MPS or Metal). The server frees the failed request's memory, so a retry,
-    later or on another server, may succeed;
-  - **500**: any other server error.
-  Every error body also has a `code`: `INVALID_REQUEST` (422), `OUT_OF_MEMORY` (503) or `INTERNAL_ERROR` (500).
+    later or on another server, may succeed. Also, with `code` `OVERLOADED` and `Retry-After: 1`, a request beyond
+    `--max-requests` in flight (1,024 by default; those whose body is being read count too), refused before its body is
+    read;
+  - **504**: no answer within `--request-timeout` seconds (off by default; `code` `TIMEOUT`): the request's work
+    still queued is dropped, an engine call already running finishes;
+  - **500**: any other server error;
+  - **499** (2.6): the client disconnected (a timeout, a closed connection) before its answer. The request is
+    cancelled, so its work still waiting for the engine is dropped. Nobody reads this answer (the same body with
+    every error format and on `/v1/decisions`); it shows in `--ui` and in the logs of a proxy in front of the server.
+  Every error body also has a `code`: `INVALID_REQUEST` (422), `OUT_OF_MEMORY` or `OVERLOADED` (503), `TIMEOUT` (504),
+  `INTERNAL_ERROR` (500) or `CLIENT_DISCONNECTED` (499).
   A 422 adds `detail`, a one-item body-location validation error; `error` retains the message.
 
   `basal-serve --error-format openai` answers `{"error": {"message": "...", "type": "validation_error" |
@@ -94,13 +109,25 @@ one shared state (SOAM); asking them in one request is faster than separate requ
 - `GET /v1/models` returns `{"models": [{"name", "description", "release_date", "mode", "early_exit",
   "temperature_per_prim", "certified", "context"}]}`. `certified` maps each `max_error` target to certified confidence
   thresholds by question type (omitted when the calibration does not match); `context` reports the limit, overflow policy
-  and truncation head share. `release_date` is the engine's release date, not the model's.
+  and truncation head share. `release_date` is the engine's release date, not the model's. `revision` and
+  `model_files` (2.8) are the Hugging Face commit the server serves and the digest of its model files
+  ([CALIBRATION.md](CALIBRATION.md#which-model-a-file-belongs-to)), what `basal-calibrate --url` records in
+  `fitted_on`. They are always present, and null when the model is not a Hugging Face cache snapshot (a local
+  directory) or its files cannot be read without opening them (`model_files` only; also null for `--mode gguf`,
+  `ollama` and `llamacpp`).
 - `GET /health` returns `{"status": "ok", "running": R, "queued": Q}` (2.3.1). The counts cover the decision requests
   in flight (`/v1/systemone`, `/v1/basal` and MCP tool calls), from the moment the server has read a request until its
   answer or error. `queued` counts those waiting for the engine: all their queue entries are still in the server's
   queue (the main queue, the `--scheduler` backlog or the `--long-lane` queue). `running` counts the others: in an
   engine call, or in the server's own work before or after one (a request with a second pass, such as `--orders auto`,
-  can be queued again). `running` and `queued` both 0 means that the server is idle.
+  can be queued again). `running` and `queued` both 0 means that the server is idle. With `basal-serve --stall-s S`
+  it answers 503 `{"status": "stalled", ..., "engine_call_s": T}` while an engine call (main lane) has run longer
+  than S seconds, so a router stops sending it requests until it answers 200 again.
+  A server with a long lane (`--long-lane auto`, the default on the CUDA graph engine, or `on`) also returns
+  `"long": {"running": R, "queued": Q}` (2.8): the requests among `running` whose work is in a long-lane engine call,
+  and among `queued` those waiting in the long lane's queue. The main lane has the rest (`running - long.running`,
+  `queued - long.queued`), so a load balancer can see the main lane free while only long states run. `running` and
+  `queued` keep their meaning (both lanes together), and a server without a long lane returns no `long`.
 
 ## Requests from other `/v1/systemone` servers' clients
 
@@ -165,8 +192,9 @@ raises `BadRequestError`), 5xx `server_error` otherwise.
 | `rank` | the candidates in order, thousands of them (experimental) | the passages for a query, the best of 5,000 products |
 
 **`multi`**: each label is asked as a yes/no branch over the shared state ("does label X apply?"). `selected` holds
-the labels with probability ≥ `threshold` (default 0.5), at most `max` and at least `min`; `set_confidence` estimates
-that the whole set is exactly right. With `"objective": "iou"`, `"f1"` or `"exact"` the engine instead returns the set
+the labels with probability ≥ `threshold` (default 0.5), at most `max` and at least `min` (with `min` above `max`,
+`min` wins: the `min` most probable labels, as since 1.5); `set_confidence` estimates that the whole set is exactly
+right. With `"objective": "iou"`, `"f1"` or `"exact"` the engine instead returns the set
 with the highest expected IoU, F1 or exact-match probability under the label probabilities (`min` / `max` bound its
 size) and its `expected_score`. An `exclusive` label is selected only alone; a `fallback` label ("none of these") is
 selected only when no other label is. See [FEATURES.md](https://github.com/rkinas/basal/blob/main/docs/FEATURES.md#choosing-the-set-objective).
@@ -284,4 +312,4 @@ Agents can call the same decisions over the Model Context Protocol: [MCP.md](htt
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [`docs/API.md`](https://github.com/rkinas/basal/blob/main/docs/API.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/API.md`](https://github.com/rkinas/basal/blob/main/docs/API.md) (upstream [`rkinas/basal`], commit [`6c1bba625b`](https://github.com/rkinas/basal/commit/6c1bba625bd7df46ef193cb779bc5ba959a8bb10), fetched 2026-11-08T10:21:01Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
