@@ -116,12 +116,17 @@ same answer there reads `"automated": {"0.01": null, "0.05": true}`.)
 ```
 
 - `enum` / `oneOf` (with `const`), `boolean` and arrays of enum values are decisions (`choice`, `multi`), with a "not
-  stated" option and calibrated probabilities.
+  stated" option and calibrated probabilities. The option keys in `probabilities` are the values as text; where two
+  values would read the same (`1` and `"1"`) or a value is `"__missing__"` (the key of "not stated"), those values are
+  keyed by their JSON form (`"\"1\""`), and `data` holds the typed value.
+- `fields` and `data` follow the schema's property names: a property named `customer.name` is one key in `data`, not
+  `customer` → `name`; a schema where such a name and a nested object give the same path is refused (422).
 - `string`, `number` and `integer` fields are two decisions, with no text generation: **which line** of the state
   gives the value (a `choice` over the lines, plus "not stated"), then **which span of that line** is exactly the value
   (a `choice` over the line's candidate spans: the parts between separators, the part after a colon, and runs of
   words). A value is therefore always exact text of the document, with `start` / `end` character offsets. Numbers are
-  parsed from the span (`1 234,56` and `1,234.56`). All fields of a request are answered in two packed rounds.
+  parsed from the span (`1 234,56` and `1,234.56`; `2.500` is 2500 in a Polish question and 2.5 in an English one;
+  `1, 2` is the number 1; integers stay exact). All fields of a request are answered in two packed rounds.
 - `confidence` of a text field = P(line) × P(span); each factor is a calibrated decision.
 - `automated[max_error]` per field (2.2), with a threshold certified for `extract` (fitted on the fields of your
   labelled extract questions, see [CALIBRATION.md](CALIBRATION.md#tasks-classify-verify-extract)); `null` without one
@@ -184,4 +189,4 @@ thresholds fitted for the task (`task_thresholds` in the calibration file).
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [`docs/TASKS.md`](https://github.com/rkinas/basal/blob/main/docs/TASKS.md) (upstream [`rkinas/basal`], commit [`8e80d3eba0`](https://github.com/rkinas/basal/commit/8e80d3eba0fd0bff8195e39c928ceac9194c8b82), fetched 2026-11-04T12:18:39Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/TASKS.md`](https://github.com/rkinas/basal/blob/main/docs/TASKS.md) (upstream [`rkinas/basal`], commit [`6c1bba625b`](https://github.com/rkinas/basal/commit/6c1bba625bd7df46ef193cb779bc5ba959a8bb10), fetched 2026-11-08T10:21:01Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

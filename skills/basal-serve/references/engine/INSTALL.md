@@ -66,7 +66,7 @@ missing):
 ```bash
 uv venv --python 3.12 --allow-existing ~/basal-env && source ~/basal-env/bin/activate
 uv pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
-uv pip install "basal[fp8] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"
+uv pip install "basal[fp8] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"
 basal-serve --model Remek/basal-2.0-4.5B --mode fast --template-prefix off --port 8000
 ```
 
@@ -93,6 +93,15 @@ basal-serve --model Remek/basal-2.0-4.5B --mode fast --template-prefix off --por
   `--mode fast` refuses the model and says so, and without `--mode` the model runs in `eager` (3-10x slower).
 - From a clone instead: `git clone https://github.com/rkinas/basal && cd basal && uv pip install -e ".[fp8]"`
   (after the torch line above).
+
+On native Windows, Qwen3.5 on SM120 was checked with PyTorch 2.11.0+cu128 and these kernel packages
+(install after PyTorch and basal above):
+
+```powershell
+python -m pip install triton-windows==3.6.0.post26 flash-linear-attention==0.5.2
+```
+
+See the [RTX 5060 Ti environment and measurements](HARDWARE.md#basal-omni-pico-on-rtx-5060-ti-sm120-native-windows).
 
 Ask questions with curl. Several questions about one state go into one request and share the state:
 
@@ -152,8 +161,9 @@ async def main():
 asyncio.run(main())
 ```
 
-Errors are `InvalidRequest` (422), `OutOfMemory` (503) and `ServerError` (500), all `BasalError` with `.status` (a
-`RuntimeError`, as before). `http=` takes your own `httpx.Client` / `httpx.AsyncClient` (headers, proxies, transport).
+Errors are `InvalidRequest` (422), `OutOfMemory` (503), `NotReady` (an `OutOfMemory`: the 503 of a server still
+starting or a router with no replica ready, retried the same way), `AuthError` (a `ServerError`: 401 / 403) and
+`ServerError` (500 and any other status), all `BasalError` with `.status` (a `RuntimeError`, as before). `http=` takes your own `httpx.Client` / `httpx.AsyncClient` (headers, proxies, transport).
 
 ### FP8 checkpoints (basal engine)
 
@@ -178,13 +188,13 @@ ties, and accuracy moved by −0.8 to +1.4 points against them on a development 
 ```bash
 # vLLM brings its own torch: a separate environment. vLLM 0.31 brings torch built for CUDA 13.0: NVIDIA driver >= 580
 uv venv --python 3.12 --allow-existing ~/basal-vllm && source ~/basal-vllm/bin/activate
-uv pip install "basal[vllm] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"
+uv pip install "basal[vllm] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"
 basal-serve --model Remek/basal-2.0-4.5B --mode vllm --port 8000          # --max-len 32768 for long documents
 
 # SGLang (own environment; its kernels need a CUDA 12.9+ toolkit; it also brings torch for CUDA 13.0: driver >= 580)
 uv venv --python 3.12 --allow-existing ~/basal-sglang && source ~/basal-sglang/bin/activate
 uv pip install --prerelease=allow "sglang[srt]==0.5.21"
-uv pip install --no-deps "basal @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"
+uv pip install --no-deps "basal @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"
 uv pip install starlette uvicorn httpx accelerate safetensors   # if missing
 basal-serve --model Remek/basal-2.0-4.5B --mode sglang --port 8000
 ```
@@ -198,10 +208,20 @@ basal-1.5 ([QUANTIZATION.md](https://github.com/rkinas/basal/blob/main/docs/QUAN
 ### Apple Silicon (MLX)
 
 ```bash
-uv venv --python 3.12 --allow-existing ~/basal-mlx && source ~/basal-mlx/bin/activate
-uv pip install "basal[mlx] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"
+uv python install cpython-3.12-macos-aarch64-none
+uv venv --python cpython-3.12-macos-aarch64-none --allow-existing ~/basal-mlx && source ~/basal-mlx/bin/activate
+uv pip install "basal[mlx] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"
 basal-serve --model Remek/basal-2.0-4.5B-MLX-8bit --mode mlx --port 8000
 ```
+
+- **The native arm64 Python.** `uv venv --python 3.12` can take an x86_64 Python that runs under Rosetta, and there
+  torch has no build and the `mlx` extra installs nothing; the full name asks uv for the arm64 build. `uname -m`
+  prints `arm64` in a terminal that does not run under Rosetta (`x86_64` under Rosetta). An environment made with an
+  x86_64 Python keeps its packages under `--allow-existing`, though its interpreter becomes arm64: the line after
+  replaces basal's own, but any other stays x86_64 and fails to import. If
+  `grep -l x86_64 ~/basal-mlx/lib/python3*/site-packages/*.dist-info/WHEEL` lists any, make the environment once with
+  `--clear` in place of `--allow-existing` (not in the line itself: it would also empty an environment that is right,
+  with anything else installed into it).
 
 The request and response are the same as above. `-MLX-8bit` holds affine 8-bit decoder weights; the token embeddings
 and the output head stay in bf16, because the decision is read from the output head. The state of a request is
@@ -215,8 +235,11 @@ The basal server runs in front of Ollama or llama.cpp: it renders basal's own pr
 log-probabilities of the option codes of one generated token. Ollama 0.12.11 or newer:
 
 ```bash
+# On a Mac, the native arm64 Python (Apple Silicon (MLX) above) in place of the next line:
+#   uv python install cpython-3.12-macos-aarch64-none
+#   uv venv --python cpython-3.12-macos-aarch64-none --allow-existing ~/basal-env && source ~/basal-env/bin/activate
 uv venv --python 3.12 --allow-existing ~/basal-env && source ~/basal-env/bin/activate
-uv pip install "basal @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"   # also installs the hf CLI
+uv pip install "basal @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"   # also installs the hf CLI
 hf download Remek/basal-2.0-4.5B-GGUF --local-dir basal-2.0-4.5B-GGUF
 cd basal-2.0-4.5B-GGUF && ollama create basal-2.0-4.5b:q8_0 -f Modelfile.Q8_0 && cd ..
 basal-serve --model ./basal-2.0-4.5B-GGUF --mode ollama --ollama-model basal-2.0-4.5b:q8_0 --port 8000
@@ -235,7 +258,7 @@ Without a separate server, `--mode gguf` loads the file in process through llama
 CUDA build it first, see [GGUF.md](https://github.com/rkinas/basal/blob/main/docs/GGUF.md)):
 
 ```bash
-uv pip install "basal[gguf] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"
+uv pip install "basal[gguf] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"
 basal-serve --model ./basal-2.0-4.5B-GGUF --mode gguf --gguf basal-2.0-4.5B-GGUF/basal-2.0-4.5B-Q8_0.gguf --port 8000
 ```
 
@@ -268,7 +291,7 @@ with no `basal-serve` in front. Requirements:
   runs it with Metal), or use the `-MLX-8bit` ports with `basal-serve --mode mlx`.
 
 ```bash
-uv pip install "basal[gguf-export] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"
+uv pip install "basal[gguf-export] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"
 hf download Remek/basal-2.0-4.5B-GGUF --local-dir basal-2.0-4.5B-GGUF
 basal-export-gguf ./basal-2.0-4.5B-GGUF lmstudio/basal-2.0-4.5B-Q8_0.gguf \
     --gguf basal-2.0-4.5B-GGUF/basal-2.0-4.5B-Q8_0.gguf --systemone
@@ -319,7 +342,7 @@ use transformers), then the `tpu` extra (JAX and libtpu from PyPI; Python 3.12 o
 ```bash
 uv venv --python 3.12 --allow-existing ~/basal-tpu && source ~/basal-tpu/bin/activate
 uv pip install "torch>=2.11" --index-url https://download.pytorch.org/whl/cpu
-uv pip install "basal[tpu] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"   # 2.2.0: the first release with --mode tpu
+uv pip install "basal[tpu] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"   # 2.2.0: the first release with --mode tpu
 basal-serve --model Remek/basal-2.0-4.5B --port 8000   # --mode tpu is the default on a TPU VM
 ```
 
@@ -344,12 +367,14 @@ same; single questions take as long as in `eager`).
 ### Images and audio: basal-omni (experimental)
 
 Install the `media` extra (pillow, soundfile, scipy, torchvision) and serve a basal-omni model in `eager` mode with
-`--media on`:
+`--media on`. torchvision must be the build of the installed torch (the same CUDA), which no version in the extra can
+name: install the pair together from torch's index, as in the second line, and the extra then keeps it. A torchvision of
+another build fails at load ("operator torchvision::nms does not exist").
 
 ```bash
 uv venv --python 3.12 --allow-existing ~/basal-env && source ~/basal-env/bin/activate
 uv pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
-uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.5.4.tar.gz"
+uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"
 basal-serve --model Remek/basal-omni-1.0-mini --mode eager --media on --port 8000   # or Remek/basal-omni-1.0-max
 ```
 
@@ -366,7 +391,9 @@ curl -s localhost:8000/v1/systemone -H 'content-type: application/json' -d '{
              "criteria": {"23": "23%", "8": "8%", "5": "5%", "0": "0% lub zwolniony"}}}}'
 ```
 
-- Images: any format Pillow reads; `"detail": "high"` reads small print (1,120 image tokens instead of 280; slower).
+- Images: any format Pillow reads, one frame (an animated GIF, PNG or WebP, or a multi-page TIFF, is refused); the
+  EXIF orientation is applied, a transparent image is put on white, and an image is kept at most 4,096 px a side.
+  `"detail": "high"` reads small print (1,120 image tokens instead of 280; slower).
   Audio: WAV, FLAC, OGG or MP3, at most 30 s a clip (a longer clip is refused after reading 30 s of it). At most 8
   items and 20 MB each per request.
 - Answers carry `"calibration": "text"`: the temperatures and thresholds were fitted on text, so validate them on your
@@ -378,4 +405,4 @@ curl -s localhost:8000/v1/systemone -H 'content-type: application/json' -d '{
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [`docs/INSTALL.md`](https://github.com/rkinas/basal/blob/main/docs/INSTALL.md) (upstream [`rkinas/basal`], commit [`3f66d32f2f`](https://github.com/rkinas/basal/commit/3f66d32f2fd66a7cc7130ccb7bfbcb2b103f2615), fetched 2026-11-05T17:19:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/INSTALL.md`](https://github.com/rkinas/basal/blob/main/docs/INSTALL.md) (upstream [`rkinas/basal`], commit [`6c1bba625b`](https://github.com/rkinas/basal/commit/6c1bba625bd7df46ef193cb779bc5ba959a8bb10), fetched 2026-11-08T10:21:01Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
