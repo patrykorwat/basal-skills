@@ -206,6 +206,82 @@ clients (decisions/s; questions/s with five per request). fla 0.5.2 for the Gate
   (GEMMs ~3 ms, fla's Gated DeltaNet and convolution kernels ~2.3 ms); a five-question request about 27 ms, of which
   8.5 ms is the tokenizer (with `TOKENIZERS_PARALLELISM=false`, as in these runs).
 
+## basal-omni-pico on RTX 5060 Ti (SM120, native Windows)
+
+Measured 2026-11-05 on one RTX 5060 Ti 16 GB, driver 621.01, Windows, Python 3.12.11,
+PyTorch 2.11.0+cu128, Transformers 5.17.0, triton-windows 3.6.0.post26 and FLA 0.5.2; no causal-conv1d.
+Model `Remek/basal-omni-pico`; engine 2.5.3.
+
+Local HTTP, concurrency 4, seed 0, three runs per mode/workload: 10 warm-up, 20 sequential and 80 concurrent
+requests each. Short/multi use about 512 synthetic tokens; long uses 1,500 (different from the H100 table).
+Fast used FA2 and `--batches default`. Each mode received a control request first; each run waited for
+GPU temperature <=45 C and utilization <=5% for three samples five seconds apart. Windows desktop apps remained.
+Throughput is median [min, max]; p50/p95 are medians of per-run sequential percentiles. All runs had zero errors.
+
+| Mode | Workload | Throughput median [min, max] | p50 / p95 (ms) | Throughput / Eager |
+|---|---|---|---|---|
+| `eager` | short, 1 q | 17.77 [17.52, 18.70] req/s | 70.57 / 119.77 | 1.00x |
+| `fast-nocompile` | short, 1 q | 37.11 [37.09, 37.93] req/s | 29.79 / 33.36 | 2.09x |
+| `fast` | short, 1 q | 43.77 [43.76, 43.78] req/s | 25.44 / 28.93 | 2.46x |
+| `eager` | short, 5 q | 22.17 [22.06, 22.19] q/s | 187.04 / 233.23 | 1.00x |
+| `fast-nocompile` | short, 5 q | 120.55 [118.72, 120.62] q/s | 49.35 / 53.46 | 5.44x |
+| `fast` | short, 5 q | 140.12 [140.07, 140.21] q/s | 43.26 / 46.77 | 6.32x |
+| `eager` | long, 5 q | 8.01 [7.97, 8.11] q/s | 607.19 / 976.15 | 1.00x |
+| `fast-nocompile` | long, 5 q | 57.34 [57.06, 57.57] q/s | 87.22 / 124.06 | 7.16x |
+| `fast` | long, 5 q | 69.15 [69.12, 69.18] q/s | 76.28 / 105.81 | 8.64x |
+
+Startup to healthy HTTP (one start per mode): Eager 15.56 s, Fast without compile 122.59 s, Fast 95.46 s.
+Model/Triton/Inductor caches were retained; startup is separate from request latency, not a cold-cache measurement.
+
+The synthetic agreement check against `eager-fp32` passed: 420 readouts, 99.52% top-1 agreement (both disagreements
+were near ties), 98% decision agreement, 99.5% independence. The gate allows near ties; this is not held-out accuracy.
+The saved report omits seed, per-call and engine commit. Only this RTX 5060 Ti was measured, not other SM120 cards.
+
+## Concurrent clients over 3k-token states (basal-omni)
+
+How far one server scales with concurrent clients when every request has the same shape: one choice question over a
+state of about 3,000 tokens ([#136](https://github.com/rkinas/basal/issues/136)). basal 2.6, `basal-serve --mode
+fast`, one GPU, the HTTP load test below. *p50 / p95*: 20 sequential requests from one client. *decisions/s*: 200
+requests from C clients at once. *GPU memory*: the server process at its peak during the sweep (nvidia-smi).
+
+```bash
+basal-serve --model Remek/basal-omni-1.0-ultra-FP8 --mode fast            # once more with --deterministic
+for c in 1 4 8 16 32; do
+  basal-loadtest --synthetic 3000 --n-seq 20 --n-conc 200 --concurrency $c --out conc-$c.json
+done
+```
+
+RTX PRO 6000 Blackwell Max-Q (96 GB):
+
+| model | server | p50 / p95, one client | decisions/s at 1 / 4 / 8 / 16 / 32 clients | GPU memory |
+|---|---|---|---|---|
+| basal-omni-1.0-mini | `fast` | 79 / 100 ms | 12.5 / 12.2 / 11.6 / 11.7 / 11.8 | 18.9 GB |
+| | `fast --deterministic` | 80 / 102 ms | 12.5 / 12.8 / 12.7 / 12.7 / 12.7 | 19.7 GB |
+| basal-omni-1.0-ultra-FP8 | `fast` | 580 / 856 ms | 1.63 / 1.50 / 1.45 / 1.47 / 1.46 | 47.9 GB |
+| | `fast --deterministic` | 586 / 863 ms | 1.63 / 1.63 / 1.63 / 1.63 / 1.63 | 48.3 GB |
+| basal-omni-1.0-ultra (bf16) | `fast` | 834 / 1,136 ms | 1.13 / 1.13 / 1.12 / 1.11 / 1.12 | 67.6 GB |
+| | `fast --deterministic` | 835 / 1,136 ms | 1.14 / 1.14 / 1.14 / 1.14 / 1.14 | 68.4 GB |
+
+H100 80 GB (with FlashAttention 3 installed; the `fast` default then runs it, with compact rows):
+
+| model | server | p50 / p95, one client | decisions/s at 1 / 4 / 8 / 16 / 32 clients | GPU memory |
+|---|---|---|---|---|
+| basal-omni-1.0-mini | `fast` | 37 / 47 ms | 26.7 / 30.5 / 31.5 / 31.5 / 31.5 | 18.9 GB |
+| | `fast --deterministic` | 38 / 48 ms | 26.6 / 29.8 / 29.8 / 29.8 / 29.8 | 19.2 GB |
+
+- **The knee of a uniform batch of 3k-token states.** On the RTX PRO 6000 Blackwell there is none: one client already
+  reaches the ceiling, and 32 clients get the decisions/s of one. On the H100 it comes at 4–8 clients: mini goes from
+  26.7 to 31.5 decisions/s (+18%) and stays there up to 32. basal reads the answer from one forward pass over the
+  state and the options, with no token-by-token decoding, so one 3k-token prefill already keeps the GPU busy, and more
+  clients wait for each other. 0 errors in every run.
+- **`--deterministic` costs little or nothing at this length.** On the RTX PRO 6000 it matched or beat the batching
+  default: ultra-FP8 1.63 against 1.45–1.50 decisions/s, mini 12.7 against 11.6–12.2. On the H100 it gives 29.8
+  decisions/s against 30.5 at 4 clients (−2%) and against 31.5 from 8 on (−5%). Each request runs in its own forward passes with deterministic
+  kernels, so an answer does not depend on the other requests ([SERVING.md](https://github.com/rkinas/basal/blob/main/docs/SERVING.md)). Where batching does pay
+  (short states, several questions per request), see [Long states under load](#long-states-under-load-one-h100).
+- **The bf16 ultra fits on the 96 GB card** (68.4 GB at its peak). The `-FP8` checkpoint gives 1.44× its throughput
+  (1.63 against 1.13 decisions/s) in 48 GB.
+
 ## Kernels of the CUDA graph engine (one H100)
 
 The engine options of the kernel study, measured served over HTTP. The model is a 4.5B development checkpoint of
@@ -709,7 +785,7 @@ the Llama-architecture models basal-1.5 and basal-2.0 only, and was measured wit
 cannot run are refused at start-up with a message naming what does not fit: the mini models (hidden size 1,536, 6 query
 heads per kv head) and basal-omni (Gemma 4) are not supported; the 11B max models pass the checks but have not been
 measured. ROCm only, bf16, tile configs tuned on the Radeon 8060S. It needs a C compiler at start-up: Triton builds its
-launcher there (`sudo apt install build-essential`). **Every number in this section was measured by
+launcher there (`apt install build-essential` (as root)). **Every number in this section was measured by
 @kardysm** on the machine below, except the last bullet (a second machine, measured by @piotrkowski); we have not
 reproduced them. The benchmark scripts and raw results are in the author's fork,
 [kardysm/basal#3](https://github.com/kardysm/basal/pull/3).
@@ -787,7 +863,7 @@ every shape: 268 s (basal-2.0) and 180 s (mini) on a v5e, cached for later start
 Not on TPU: evidence spans, `--media`, early exit and quantisation. The 44 examples are a small sample; agreement and
 speed on your own items: `basal-bench --modes eager-fp32 tpu --questions <file.jsonl>`.
 
-## DGX Spark (GB10): batch flags with basal-2.0
+## Dell Pro Max with GB10: batch flags with basal-2.0
 
 Whole-batch throughput of the bf16 engine (not `fp8`): `basal-calibrate --mode fast-nocompile` at the default
 concurrency (32) on 800 English decisions (every 5th line of a 4,000-decision public panel), basal-2.0 (4.5B) with
@@ -826,7 +902,7 @@ On the GB10 the fastest variant, `--concurrency 128`, saves about 5% of the time
 - **DGX Spark (GB10, aarch64, CUDA 13).** In the README install steps use the CUDA 13 build of PyTorch
   (`uv pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu130`) instead of cu128. The GPU shares LPDDR5X memory (about 273 GB/s) with the CPU; every forward pass reads
   all weights, which is why FP8 (half the bytes) halves latency. With PyTorch 2.13 (cu130), `--batches compact`
-  and the format-1 cascade also run; batch flags measured: [DGX Spark (GB10): batch flags](#dgx-spark-gb10-batch-flags-with-basal-20).
+  and the format-1 cascade also run; batch flags measured: [Dell Pro Max with GB10: batch flags](#dell-pro-max-with-gb10-batch-flags-with-basal-20).
 - **B300 / B200 (sm_100/sm_103).** PyTorch cu130 wheels work. The `vllm` mode needs a CUDA toolkit (nvcc) of version
   12.9 or newer on the machine: vLLM's FlashInfer kernels are compiled on first use, and nvcc 12.8 (found in some
   container images) cannot target the B300 (`Unsupported gpu architecture 'compute_103a'`). Compilation of `nvfp4` takes long (about 50 minutes on
@@ -842,4 +918,4 @@ On the GB10 the fastest variant, `--concurrency 128`, saves about 5% of the time
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [`docs/HARDWARE.md`](https://github.com/rkinas/basal/blob/main/docs/HARDWARE.md) (upstream [`rkinas/basal`], commit [`3f66d32f2f`](https://github.com/rkinas/basal/commit/3f66d32f2fd66a7cc7130ccb7bfbcb2b103f2615), fetched 2026-11-05T17:19:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/HARDWARE.md`](https://github.com/rkinas/basal/blob/main/docs/HARDWARE.md) (upstream [`rkinas/basal`], commit [`6c1bba625b`](https://github.com/rkinas/basal/commit/6c1bba625bd7df46ef193cb779bc5ba959a8bb10), fetched 2026-11-09T07:59:29Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.

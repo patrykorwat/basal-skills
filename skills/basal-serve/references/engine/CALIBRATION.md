@@ -31,10 +31,12 @@ otherwise keeps the file's temperatures without its thresholds (`max_error` defe
 answer `"calibration": "unvalidated"`. A format-2 model may ship an optional `CALIBRATION.o2.json` for `--orders 2`.
 `--url` refuses a server that applies temperatures (it reports them in `GET /v1/models`). Other options:
 
-- `--targets 0.01,0.05`: any `max_error` values.
+- `--targets 0.01,0.05`: any `max_error` values from 1e-6 up to (not including) 1.
 - `--min-per-type 50`.
 - `--min-blend 10`: a type (or option-count bucket) with fewer FIT decisions than `--min-per-type` but at least this
   many gets its fitted temperature blended with the shipped one (below). `0` keeps the shipped one, as before 2.2.
+- `--keep-shipped noul` (a list of `choice`, `noul`, `score`): those types keep the compared file's temperature and
+  its thresholds together instead of being fitted (below, "Keeping a shipped type").
 - `--report-only`: print the report on your labelled requests (accuracy, ECE, the thresholds, the share automated,
   and how the compared file does on them) without writing a file. Use it to evaluate a model, or a calibration file
   given with `--calibration`, on your own data.
@@ -72,7 +74,7 @@ One `/v1/systemone` request per line; every question carries its correct answer 
 | `gold` (score) | the level index (0 = first level), its key, or its text; an integer is always the index, and is refused when a numeric key names another level (`{"1": ..., "2": ..., "3": ...}` with `"gold": 2`: give `"2"`) |
 | `gold` (act) | an outcome, as for choice (`"yes"` / `"no"` for `true` / `false` outcomes); `act` counts as its base type |
 | `gold` (multi) | the list of labels that apply: keys or descriptions, with `[]` for none (see [below](#multi-the-fallback-threshold-of-a-label-set)) |
-| `group` | optional, on the line or on a question: decisions of one group (twins, duplicates, one customer) stay on the same side of the split; default: one group per line, since the questions of a request share its state (`null` counts as not given, as for `id`). The bound of a threshold counts every decision as independent: when a type or task has more FIT decisions than groups (the claims of one document, the fields of one form), errors shared within a group make it optimistic, and the report warns with the decisions per group |
+| `group` | optional, on the line or on a question: decisions of one group (twins, duplicates, one customer) stay on the same side of the split; default: one group per line, since the questions of a request share its state (`null` counts as not given, as for `id`). When the errors of a group's decisions go together (the claims of one document, the fields of one form), the bound counts them as fewer independent decisions (see step 3 below), and the report names the decisions per group, the correlation of their errors and the design effect |
 | `family` | optional, on the line or on a question: the task family of the leave-one-family-out ECE (one kind of decision: a routing question, a document check); default: the question name |
 | `id` | optional, used in messages |
 
@@ -120,6 +122,17 @@ The shipped files were fitted with the same steps:
    The cost is that errors among the very top decisions end the test there (one is allowed at the start when the
    type has enough decisions); label more data, or check the CERT report, when a type you expected to certify does
    not (the reason names the first level and its errors).
+   **Decisions that share a group** (several claims of one document, fields of one form, questions about one state)
+   are not independent when a wrong one makes the others likelier wrong. The bound then counts them as fewer
+   independent decisions: the intraclass correlation *ρ* of their errors within groups is estimated on the type's
+   (or task's) FIT decisions, and every level's accepted decisions and errors are divided by the design effect
+   1 + (*m* − 1) *ρ*, *m* the mean size of the group a FIT decision is in (the same *m* for every level, which keeps the
+   bound on the safe side when *ρ* is underestimated, as it is with rare errors). With one decision per group, or
+   errors that do not go together (*ρ* = 0), nothing changes. This is an approximation, not an exact bound: *ρ* is
+   estimated from the same decisions. In simulations of 70 FIT documents × 30 claims whose error rate varies strongly
+   by document (a 1% target), counting the claims as independent certified a mean error of 1.2% in 15% of runs and of
+   1.05% in 20%; with the design effect, 5% and 7%. Certifying such a task takes more labelled documents, not more
+   claims per document. The report gives `icc` and `design_effect` per type and task.
    Each certificate is one test of one question type at one target error: its 95% holds for that type and target,
    which is what a request's `max_error` on a question of that type relies on. It is not a joint statement over all
    types and targets at once (with three types and two targets, the chance that at least one of the six is wrong can
@@ -144,7 +157,10 @@ The shipped files were fitted with the same steps:
      for the mix of question types it was certified on, not for each type; callers who need a per-type guarantee
      should use a format-2 model.
 4. CERT, not used for fitting, reports coverage, error and the same bound at that threshold, next to the shipped
-   threshold on the same decisions.
+   threshold on the same decisions. When CERT refutes a threshold (its errors at that threshold put the one-sided 95%
+   *lower* bound of the error above the target) the threshold is withdrawn: the type (or task) has none at that target,
+   `"refuted"` keeps the FIT threshold and the reason names CERT's errors. A threshold that holds is refuted at most
+   5% of the time, since CERT took no part in the fit.
 5. The gates. They are measured, not fitted.
    - `ece_lofo`, per type: for every family, the temperatures are fitted again on the FIT decisions of the other
      families and applied to that family's CERT decisions. The ECE is then reported per family, as the mean and the
@@ -157,6 +173,36 @@ The shipped files were fitted with the same steps:
      own threshold and a type without one not at all. `automated_error` is their error on CERT, and
      `automated_at_pooled` is the share the single pooled threshold would automate, for comparison only. A target that
      is certified for no type gets 0.
+
+### Keeping a shipped type
+
+A fit can leave a type with no threshold at a `max_error` that the compared file certified: too few labelled decisions
+of the type, or none meeting the bound. Serving that file defers every answer of the type, although the shipped file
+automated part of them. A shipped threshold cannot simply be kept next to a fitted temperature: it was certified with
+the shipped temperature. The warning names such a type, and `--keep-shipped TYPE` keeps both together:
+
+- the type's temperature (for `choice` in a format-2 file also its option-count bucket temperatures) and its
+  per-type threshold at every target are the compared file's; a target where that file has none has none here;
+- each kept threshold is marked `"kept": "shipped"`, with its coverage and error on your FIT and CERT split, and the
+  report flags it when CERT does not confirm it; `fitted_on.kept_shipped` lists the kept types, and
+  `fitted_on.kept_shipped_from` names the compared file (its name, the SHA-256 of its bytes and its `certified_on`);
+- a kept threshold that your decisions refute is withdrawn (`"confidence": null` with `"refuted"`, so `basal-serve`
+  defers), as a fitted threshold that CERT refutes is. Neither of your splits certified it, so FIT and CERT test it
+  together: the one-sided 95% lower bound of their error at the threshold is above the target, with decisions that
+  share a group counted as the independent ones they are worth (the design effect);
+- the other types are fitted as usual.
+
+`--keep-shipped` refuses two compared files:
+- a format-1 file without per-type thresholds (the basal-1.5 files). Its one threshold was certified over all the
+  types together; `basal-serve` applies it to each type of that file, but kept per type it would become a
+  certificate of each;
+- a file of another engine, as its `"engine"` field or its name says (`CALIBRATION.json` for the bf16 engines,
+  `CALIBRATION.<engine>.json`). Its thresholds were certified on that engine's probabilities, so a bf16 file's is not
+  kept in a GGUF or MLX file. A file that says neither is kept, with a warning.
+
+The kept threshold is certified on the data the shipped file was fitted on, not on yours: read its CERT line before
+relying on it. Label more decisions of the type to fit it on your own data instead. With task questions only (no
+decision questions), the compared file's decision calibration is kept whole anyway, so the option changes nothing.
 
 The thresholds hold for the mix of question types and prompts you calibrated on. The leave-one-family-out ECE shows
 how well one temperature carries over to a kind of decision it was not fitted on, such as a new question in
@@ -274,16 +320,50 @@ classify    ...
 The probabilities, and so the temperatures and thresholds, belong to one model. `fitted_on` records the model as given
 to `basal-calibrate`, except that a Hugging Face cache snapshot path is recorded as its repository ID in
 `fitted_on.model` and its commit in `fitted_on.revision`. A repository ID likewise records its resolved commit;
-plain local directories keep their path without a revision. `basal-serve --calibration FILE` compares
-them with the served model: on another model, or another revision, it warns at start-up, reports
-`"calibration_warning"` in `GET /v1/models` and keeps the file for its temperatures only, as a file of other option
-orders: its thresholds, task thresholds, conformal levels and fitted fallback thresholds are not applied (`max_error`
-defers, tasks report `automated: null`, answer sets hold every option) and every answer is marked
-`"calibration": "unvalidated"`; with `--strict-calibration` it refuses to start. When both are Hugging Face snapshots
-(a revision on each side) the whole repository ID is compared, so `OrgA/basal-x` is not `OrgB/basal-x`; a local copy
-of a model matches its Hugging Face name by the last part of the path (`/data/basal-omni-1.0-max` =
-`Remek/basal-omni-1.0-max`).
-The files that ship in a model's directory are not checked.
+plain local directories keep their path without a revision. With a revision, `fitted_on.model_files` identifies the
+model's files: 16 hex digits of the sha256 of the sorted list of their paths, sizes and blob names in the Hugging Face
+cache (a blob is named by the file's LFS sha256, else its git blob id, so no file is read). It covers every file that
+makes the answers (the weights, the tokenizer, the chat template, `config.json`, `basal.json`, ...) and leaves out
+the model card (`*.md`, its images, `SHA256SUMS`, `.gitattributes`, `LICENSE*`), the shipped `CALIBRATION*.json` and
+`prepared/`. It is not recorded for `--mode gguf`, `ollama` and `llamacpp`, which serve weights the model directory
+does not hold, nor from a cache without symlinks (Windows without developer mode), whose files would have to be read.
+
+`basal-serve --calibration FILE` compares them with the served model: on another model, or on another revision with
+other model files, it warns at start-up, reports `"calibration_warning"` in `GET /v1/models` and keeps the file for
+its temperatures only, as a file of other option orders: its thresholds, task thresholds, conformal levels and fitted
+fallback thresholds are not applied (`max_error` defers, tasks report `automated: null`, answer sets hold every
+option) and every answer is marked `"calibration": "unvalidated"`; with `--strict-calibration` it refuses to start.
+When both are Hugging Face snapshots (a revision on each side) the whole repository ID is compared, so `OrgA/basal-x`
+is not `OrgB/basal-x`. When a side has no revision (a local folder), the files decide: `basal-calibrate` records
+`fitted_on.model_content`, 16 hex digits over the same files' sizes and the sha256 of their content (a file up to 3
+MiB whole, a larger one by its first, middle and last MiB, so a few MiB are read per file), for any folder. A file
+fitted on `/data/run1/final` then does not hold for `/data/run2/final`, another checkpoint in a folder of the same
+name, and holds for a copy of the same weights under any name. A file without `fitted_on.model_content` (written
+before basal-calibrate recorded it) is matched by the last part of the path, as before, so a local copy of a model
+matches its Hugging Face name (`/data/basal-omni-1.0-max` = `Remek/basal-omni-1.0-max`); when such a file was fitted
+on a local folder, basal-serve warns at start-up that it is matched by the folder's name alone.
+The files that ship in a model's directory are not checked. `basal-calibrate` applies the same rule to the file it
+compares with (`--calibration`, or the one a `--save-rows` run compared with, for `--from-rows`): fitted on another
+model, on a revision with other model files or with another adapter, it keeps its temperatures for the types with too
+few decisions, and its thresholds and task thresholds are neither compared nor kept (a run with task questions only
+no longer copies them into the new file). With `--url` and no `--model`, the served model is known only by
+the server's name, so the file is not checked.
+
+With `--url` and `--model` (a repository ID), `fitted_on.revision` and `fitted_on.model_files` are the ones the server
+serves, as it reports them in `GET /v1/models` (2.8). Before, they were those of the revision the local cache resolves
+`--model` to, which may be another one: a server pinned to an older revision got main's commit. When the two differ,
+basal-calibrate warns, records the server's, and judges the file it compares with (`--calibration`) by the server's
+model files; the shipped file it compares with is still the cache's (`--revision <commit>` takes the server's own). A
+server that serves no cache snapshot (`revision` null) and a server before 2.8 (no `revision` field) leave the cache's
+revision in the file, as before; for the latter basal-calibrate warns: pass the server's revision with `--revision`.
+
+A revision that changes only the model card holds the same model files, so the file is applied with its thresholds.
+A file without `fitted_on.model_files` (written before basal-calibrate recorded it) is compared through the cache:
+when the cache holds the snapshot of the fitted revision with the same files as the served one (as after an update on
+the same machine, since the Hugging Face cache keeps the old snapshot), their blobs decide. Otherwise the file counts
+as fitted on another revision, as before, and the warning says how to keep its thresholds: serve the fitted revision
+(`--revision <commit>`), or refit, which records the model files. basal-serve does not ask the Hub for a revision's
+files, so whether a file's thresholds apply depends on the file and the local cache only, online or offline.
 
 With `--adapter`, `basal-calibrate` records the adapter as `fitted_on.adapter` (`<name>@<sha256 of its
 adapter_config.json and weights>[:12]`, so a rescaled adapter is another one)
@@ -318,8 +398,9 @@ decisions without an error (...); this file gives 192 FIT decisions of 275; labe
 A threshold certified on FIT is written even when its CERT decisions are too few to confirm it. 2.3.1 then says so,
 in the report and on stderr: "noul at max_error 0.01: certified on FIT; CERT has 150 accepted, 1 error, upper bound
 3.12% > 1%, too few to confirm on CERT (0 errors would need >= 299 accepted CERT decisions)". If the error observed on
-CERT is above the target, it says that the threshold does not hold on CERT. The threshold and the exit status do not
-change (`--strict` checks only the leave-one-family-out ECE).
+CERT is above the target, it says that the threshold does not hold on CERT. Such a threshold stays (and the exit
+status does not change; `--strict` checks only the leave-one-family-out ECE) unless CERT refutes it, as in step 4
+above: then it is withdrawn.
 
 ## Output
 
@@ -327,13 +408,15 @@ change (`--strict` checks only the leave-one-family-out ECE).
 informational pooled `thresholds[<target>].confidence`) plus
 `temperature_source`, the FIT and CERT figures of each threshold, `engine` (the engine it was fitted on: `fast`,
 `fp8`, `vllm`, ...; serve it with that engine, or ship it as `CALIBRATION.<engine>.json`) and `fitted_on` (file,
-number of decisions and requests, FIT / CERT sizes, date, model and its revision, engine; with task questions the
-task decisions per task). It also has `gates` (`ece_lofo`, `automated_at`, `ece_reference`), from labelled `multi`
-questions `multi`, and from task questions `task_thresholds` (what basal-serve applies) and `task_gates` (their FIT
-and CERT figures). A file fitted on task questions only says where its decision calibration comes from in
-`decision_calibration`. For a prompt-format-2 model it is
+number of decisions and requests, FIT / CERT sizes, date, model, its revision and model files, engine; with task
+questions the task decisions per task). It also has `gates` (`ece_lofo`, `automated_at`, `ece_reference`), from
+labelled `multi` questions `multi`, and from task questions `task_thresholds` (what basal-serve applies) and
+`task_gates` (their FIT and CERT figures). A file fitted on task questions only says where its decision calibration
+comes from in `decision_calibration`. For a prompt-format-2 model it is
 calibration file 2: `"prompt": 2` and `temperature_per_bucket` (the table then has one row per bucket under `choice`);
-basal-serve refuses a file fitted for another prompt format than the model's. The table printed at the end:
+for a format-1 model it says `"prompt": 1`. basal-serve refuses a file fitted for another prompt format than the
+model's (a file 1 written before 2.8 does not say its format, and is read as one of the model's), and basal-calibrate
+refuses such a file to compare with. The table printed at the end:
 
 ```
 type        n   FIT  CERT  accuracy   temperature shipped -> fitted   ECE on CERT shipped -> fitted
@@ -370,4 +453,4 @@ count (2–255) the `choice` row marks its type temperature `(not served: bucket
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [`docs/CALIBRATION.md`](https://github.com/rkinas/basal/blob/main/docs/CALIBRATION.md) (upstream [`rkinas/basal`], commit [`3f66d32f2f`](https://github.com/rkinas/basal/commit/3f66d32f2fd66a7cc7130ccb7bfbcb2b103f2615), fetched 2026-11-05T17:19:55Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/CALIBRATION.md`](https://github.com/rkinas/basal/blob/main/docs/CALIBRATION.md) (upstream [`rkinas/basal`], commit [`6c1bba625b`](https://github.com/rkinas/basal/commit/6c1bba625bd7df46ef193cb779bc5ba959a8bb10), fetched 2026-11-09T07:59:29Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
