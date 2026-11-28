@@ -7,7 +7,7 @@ question. They are trained on text; with `--media on` the server also takes imag
 ## Serve
 
 ```bash
-uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.0.tar.gz"
+uv pip install "basal[media] @ https://github.com/rkinas/basal/archive/refs/tags/v2.8.1.tar.gz"
 basal-serve --model Remek/basal-omni-1.0-max --mode eager --media on --port 8000    # or Remek/basal-omni-1.0-mini
 ```
 
@@ -18,7 +18,10 @@ basal-serve --model Remek/basal-omni-1.0-max --mode eager --media on --port 8000
   workstation GPUs (sm_120, such as the RTX PRO 6000); `eager` on other GPUs until they pass theirs (2.2.0 had no
   working default for basal-omni on CUDA: `fast` stopped while loading the model). The `-FP8` checkpoints (mini, max,
   ultra) run on `--mode vllm`;
-  basal-omni-1.0-mini-FP8 also on `--mode fast` (its port gate below).
+  basal-omni-1.0-mini-FP8 also on `--mode fast` (its port gate below). `--mode eager`, `mps` and `mlx` refuse them at
+  start-up, and so does a start without `--mode` where the default would be one of those: transformers has no ModelOpt
+  loader, so they would read the FP8 weights without their scales. Before, `eager` served them that way and every
+  answer was wrong, also without `--mode` on the GPUs where basal-omni runs `eager` by default.
   With `--mode vllm` a model that ships `CALIBRATION.vllm.json` (basal-omni-1.1-max and the `-FP8` checkpoints) uses
   it; the others use their `CALIBRATION.json`.
 - **Repeatable answers with vLLM:** vLLM's numbers depend on what the server computed before (prefix cache,
@@ -373,4 +376,4 @@ within the bf16 readout's own deviation. On E4B the text answers with
 
 <!-- basal-skills engine docs mirror -->
 
-Source: [`docs/OMNI.md`](https://github.com/rkinas/basal/blob/main/docs/OMNI.md) (upstream [`rkinas/basal`], commit [`6c1bba625b`](https://github.com/rkinas/basal/commit/6c1bba625bd7df46ef193cb779bc5ba959a8bb10), fetched 2026-11-09T07:59:29Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
+Source: [`docs/OMNI.md`](https://github.com/rkinas/basal/blob/main/docs/OMNI.md) (upstream [`rkinas/basal`], commit [`50ce799752`](https://github.com/rkinas/basal/commit/50ce7997520b336e214d6f916aa3e0e4ed83cdc7), fetched 2026-11-28T11:43:32Z UTC). Mirrored by `scripts/sync_docs.py`; upstream data, do not edit locally.
